@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""generate_assets.py — render PNG assets for figure '__FIGURE_NAME__'.
+
+Independent of generate_figure.py: imports nothing from drawio. Audit each
+asset PNG in isolation in Preview before embedding.
+
+Outputs:  ../../assets/__FIGURE_NAME__/*.png
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+# Headless render — must come before importing pyplot.
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib-cache")
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Generic styling primitives from the skill's lib (NO project residue).
+from sci_figure_lib.matplotlib_helpers import (
+    apply_pub_rcparams,
+    apply_pub_bar_style,
+    apply_pub_scatter_style,
+    apply_pub_fan_style,
+    cluster_ellipsoid,
+)
+
+# ---------- Project-specific palette + asset directory --------------------
+
+ROOT = Path(__file__).resolve().parents[2]
+ASSET_DIR = ROOT / "assets" / "__FIGURE_NAME__"
+ASSET_DIR.mkdir(parents=True, exist_ok=True)
+
+apply_pub_rcparams()
+
+# Define the figure's palette and class names HERE, not in the skill lib.
+PALETTE: dict[str, str] = {
+    # "class_name": "#hex"  ← fill in your own
+}
+
+
+# ---------- Per-figure asset helpers --------------------------------------
+# Each helper renders one PNG. Add as needed; remove the demo when ready.
+
+
+def save_demo_bar(path: Path) -> None:
+    """Demo bar chart — replace with the figure's real bar(s)."""
+    classes = list(PALETTE.keys()) or ["A", "B", "C"]
+    values = np.linspace(0.2, 0.8, len(classes))
+    colors = [PALETTE.get(c, "#94A3B8") for c in classes]
+    fig, ax = plt.subplots(figsize=(8.0, 3.0), dpi=200)
+    fig.patch.set_alpha(0)
+    ax.bar(range(len(classes)), values, color=colors, width=0.62,
+           edgecolor="#0F172A", linewidth=2.0)
+    ax.set_ylim(0, 1.05)
+    ax.set_xticks(range(len(classes)))
+    ax.set_xticklabels(classes)
+    apply_pub_bar_style(ax)
+    fig.tight_layout(pad=0.5)
+    fig.savefig(path, transparent=True)
+    plt.close(fig)
+
+
+def save_demo_scatter(path: Path) -> None:
+    """Demo cluster scatter — replace with the figure's real feature space."""
+    rng = np.random.default_rng(0)
+    centers = [(-1.5, 0.0), (1.4, -0.6), (0.7, 1.2)]
+    fig, ax = plt.subplots(figsize=(8.0, 5.0), dpi=200)
+    fig.patch.set_alpha(0)
+    apply_pub_scatter_style(ax)
+    cls_colors = list(PALETTE.values()) or ["#2563EB", "#16A34A", "#0891B2"]
+    for c, color, ang in zip(centers, cls_colors, [10.0, -20.0, 5.0]):
+        cluster_ellipsoid(ax, c, scale=0.32, color=color, angle=ang)
+        pts = np.array(c) + rng.normal(scale=0.32, size=(28, 2))
+        ax.scatter(pts[:, 0], pts[:, 1], s=70, color=color,
+                   edgecolor="white", linewidth=1.0, zorder=2)
+        ax.scatter(*c, marker="*", s=1500, color="white", linewidth=0.0, zorder=3)
+        ax.scatter(*c, marker="*", s=1100, color=color,
+                   edgecolor="#0F172A", linewidth=1.4, zorder=4)
+    ax.set_xlim(-2.6, 2.4)
+    ax.set_ylim(-1.95, 2.0)
+    fig.tight_layout(pad=0.4)
+    fig.savefig(path, transparent=True)
+    plt.close(fig)
+
+
+def main() -> None:
+    save_demo_bar(ASSET_DIR / "demo_bar.png")
+    save_demo_scatter(ASSET_DIR / "demo_scatter.png")
+    print(f"[assets] rendered → {ASSET_DIR}")
+
+
+if __name__ == "__main__":
+    main()

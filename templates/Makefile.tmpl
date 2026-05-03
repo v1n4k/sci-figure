@@ -1,0 +1,25 @@
+# Makefile for figure '__FIGURE_NAME__'.
+# Two stages, kept independent so each can be re-run alone during audit.
+
+PYTHON ?= python
+
+.PHONY: assets figure all clean help
+
+help:
+	@echo "  make assets   — render PNG assets (matplotlib)"
+	@echo "  make figure   — build the drawio (reads existing PNGs)"
+	@echo "  make all      — assets + figure"
+	@echo "  make clean    — delete generated assets and artifacts"
+
+assets:
+	$(PYTHON) generate_assets.py
+
+figure:
+	$(PYTHON) generate_figure.py
+
+all: assets figure
+
+clean:
+	rm -rf ../../assets/__FIGURE_NAME__/*.png \
+	       ../../artifacts/__FIGURE_NAME__.drawio* \
+	       ../../artifacts/__FIGURE_NAME___review.png

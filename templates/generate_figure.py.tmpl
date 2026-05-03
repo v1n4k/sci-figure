@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""generate_figure.py — build the drawio figure for '__FIGURE_NAME__'.
+
+Independent of generate_assets.py: imports nothing from matplotlib. Reads
+PNGs from ../../assets/__FIGURE_NAME__/ and writes ../../artifacts/.
+
+Outputs:
+  ../../artifacts/__FIGURE_NAME__.drawio        ← authoritative (open in app)
+  ../../artifacts/__FIGURE_NAME__.drawio.png    ← full-resolution CLI export
+  ../../artifacts/__FIGURE_NAME___review.png    ← bounded review PNG (≤1500 px)
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+from sci_figure_lib.drawio_builder import DrawioBuilder
+from sci_figure_lib.glyphs import GlyphMixin
+from sci_figure_lib.render import (
+    cli_export,
+    make_review_png,
+    verify_aspect_ratios,
+)
+
+
+ROOT = Path(__file__).resolve().parents[2]
+ASSET_DIR = ROOT / "assets" / "__FIGURE_NAME__"
+OUT_DIR = ROOT / "artifacts"
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+OUT = OUT_DIR / "__FIGURE_NAME__.drawio"
+
+
+# ---------- Project-specific palette --------------------------------------
+# Define the figure's semantic colours HERE, not in the skill lib.
+COLORS: dict[str, str] = {
+    "ink":   "#1F2937",
+    "muted": "#6B7280",
+    # add more as the figure needs (retain / forget / frozen / trained / target)
+}
+
+
+class FigureBuilder(DrawioBuilder, GlyphMixin):
+    """Per-figure builder. Subclass to add domain glyphs not in lib/glyphs.py."""
+
+
+def build(d: FigureBuilder) -> str:
+    """Compose the figure. Returns the id of the cell that downstream
+    audits (e.g. cross-phase edges) should anchor on, or '' if none."""
+    # === Title / subtitle ===
+    d.cell(
+        "Method overview",
+        40, 24, 3000, 50,
+        "text;html=1;strokeColor=none;fillColor=none;whiteSpace=wrap;"
+        f"fontFamily={d.font};fontSize=40;fontColor={COLORS['ink']};fontStyle=1;"
+        "align=center;verticalAlign=middle;",
+    )
+    # === Sub-panels ===
+    panel_a, ax, ay, aw, ah = d.sub_panel(
+        40, 200, 800, 400, "[A]", "Panel A title",
+    )
+    # ... fill panel A using d.image('demo_bar', ...), d.tex_cell('\\beta_x', ...)
+    # ... d.gauge_glyph(...), d.dataset_glyph(...), etc.
+    return panel_a
+
+
+def main() -> int:
+    asset_files = {p.stem: p for p in ASSET_DIR.glob("*.png")}
+    if not asset_files:
+        print(
+            f"[figure] no assets in {ASSET_DIR}; run generate_assets.py first",
+            file=sys.stderr,
+        )
+        return 1
+
+    d = FigureBuilder(asset_files, page_w=3400, page_h=1340, math=True,
+                      diagram_name="__FIGURE_NAME__")
+    build(d)
+    d.write(OUT)
+    print(f"[figure] wrote → {OUT}")
+
+    verify_aspect_ratios(OUT)
+
+    # CLI export → review PNG (cleans up orphan drawio processes).
+    # Math notation in `tex_cell()` (which uses \(...\) delimiters)
+    # rasterizes correctly here; the deliverable is the .drawio source +
+    # this review PNG. See references/notation.md if math is showing up
+    # as literal text — most likely cause is bare `$...$` delimiters.
+    full_png = OUT.with_suffix(".drawio.png")
+    cli_export(OUT, full_png)
+    review_png = OUT_DIR / "__FIGURE_NAME___review.png"
+    make_review_png(full_png, review_png, target_max_px=1500)
+    full_png.unlink(missing_ok=True)  # full-res is intermediate, not deliverable
+
+    print(f"[figure] deliverables: {OUT}  +  {review_png}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

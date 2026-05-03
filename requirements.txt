@@ -1,0 +1,16 @@
+# Conference-figure plotting stack.
+# Tier 1 + core. PyMuPDF is intentionally excluded — manuscript reading
+# is outside this skill's scope.
+
+# Core
+matplotlib>=3.10
+numpy>=2.0
+Pillow>=11
+cairocffi>=1.7
+CairoSVG>=2.9
+
+# Tier 1 — broadly useful, all "data, not layout"
+scipy>=1.15
+scikit-learn>=1.6
+seaborn>=0.13
+joblib>=1.5
