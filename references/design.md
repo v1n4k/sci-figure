@@ -122,7 +122,7 @@ Candidate C — Training vs inference, two rows
                with shared learned object drawn identically in both
   Layout     : two horizontal rows, mid-figure colour legend separates
   Focal pt   : the bridge / construction panel in the training row
-  Exemplar   : exemplars/operator-latent-flow-matching.md
+  Exemplar   : exemplars/two-row-training-inference.md
   Strengths  : ideal when training and inference are the two stages
                that share a learned object; the cross-row repeat
                communicates "same network, two stages" without text

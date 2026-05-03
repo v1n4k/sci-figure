@@ -44,6 +44,6 @@ pattern over one that's similar to existing entries.
 
 ## Current exemplars
 
-- `operator-latent-flow-matching.md` — TRAINING vs INFERENCE two-row
+- `two-row-training-inference.md` — TRAINING vs INFERENCE two-row
   split; shared learned-object across rows; mid-figure colour legend
   serving as row separator.

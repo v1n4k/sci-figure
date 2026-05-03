@@ -19,7 +19,7 @@ Different conceptual structures suggest different patterns:
 | Single continuous illustration (no natural panels) | One large panel, no sub-panels at all |
 | Iterative / rollout (time evolution) | Horizontal time-axis with snapshots |
 | Hierarchical / multi-scale | Vertical stack with nested boxes |
-| **Training vs inference (shared learned object)** | **Two horizontal rows with shared element drawn identically in both; mid-figure colour legend doubles as row separator. See `exemplars/operator-latent-flow-matching.md`.** |
+| **Training vs inference (shared learned object)** | **Two horizontal rows with shared element drawn identically in both; mid-figure colour legend doubles as row separator. See `exemplars/two-row-training-inference.md`.** |
 
 The list is not exhaustive. Invent a layout when none of these fits.
 

@@ -12,12 +12,12 @@ identity, or any equation block that the reader has to *parse* rather
 than *recognise*.
 
 What's allowed: **one-line definitions** of symbols the figure
-introduces. `z(t) = e^{-tL} w(t)` next to where `z` first appears,
-`v* = (z_b - z_a)/Δt` next to the bridge it defines — these
-*replace* what would otherwise be verbose verbal labels and earn
-their place in the figure. The exemplar
-`exemplars/operator-latent-flow-matching.md` uses six such
-definitions and reads cleanly because none is a derivation.
+introduces. A definition like `z = f(w)` placed next to where `z`
+first appears, or a target like `v* = Δq/Δt` placed next to the
+construct it defines — these *replace* what would otherwise be
+verbose verbal labels and earn their place in the figure. The
+exemplar `exemplars/two-row-training-inference.md` uses around six
+such definitions and reads cleanly because none is a derivation.
 
 Practical limits:
 
