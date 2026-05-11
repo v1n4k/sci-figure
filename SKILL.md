@@ -73,6 +73,13 @@ make all       # both, then writes <name>_review.png for agent review
 `<SKILL>` resolves to the skill's path on disk (typically
 `.agents/skills/sci-figure/`).
 
+### Known drawio export failure
+
+If `make figure` or `make all` fails with drawio `SIGABRT` inside the
+Codex sandbox, rerun the same target with escalation / outside the
+sandbox. Do not treat this as `.drawio` corruption or rewrite the figure
+unless the escalated export also fails.
+
 ## Workflow (5 phases)
 
 1. **Read & understand** — read the manuscript carefully *before*

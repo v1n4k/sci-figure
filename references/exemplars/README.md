@@ -44,6 +44,9 @@ pattern over one that's similar to existing entries.
 
 ## Current exemplars
 
+- `numbered-modular-feedback-map.md` — wide modular system map with
+  numbered panels, semantic containers, a right-side status column, and
+  a bottom feedback / control strip.
 - `two-row-training-inference.md` — TRAINING vs INFERENCE two-row
   split; shared learned-object across rows; mid-figure colour legend
   serving as row separator.
