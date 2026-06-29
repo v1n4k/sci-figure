@@ -1,4 +1,4 @@
 interface:
   display_name: "Sci Figure"
-  short_description: "Design publication-quality AI/ML figures"
-  default_prompt: "Use $sci-figure to design a publication-quality method figure from my manuscript."
+  short_description: "Design publication-quality AI/ML manuscript figures"
+  default_prompt: "Use $sci-figure to design a publication-quality drawio method or concept figure from my manuscript."

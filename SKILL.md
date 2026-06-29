@@ -1,6 +1,6 @@
 ---
 name: sci-figure
-description: Use when producing or revising a single publication-quality main figure for an AI/ML manuscript at NeurIPS / ICML / ICLR quality — typically the method / pipeline / architecture overview, but any single figure the user wants designed. Triggers on "make a figure", "method diagram", "pipeline figure", "main figure", "architecture diagram", "drawio figure for the paper". One invocation = one figure. If the user wants help with a secondary / auxiliary figure they will say so explicitly. Skip for slide decks, schematic sketches, or non-paper diagrams.
+description: "Use when producing or revising one publication-quality editable .drawio figure for an AI/ML manuscript at NeurIPS / ICML / ICLR quality: method, pipeline, architecture, main figure, teaser, Figure 1 concept overview, or paper-ready drawio figure. One invocation = one figure. Use for existing-figure revisions only when the artifact is a sci-figure/drawio source, or when the user wants to rebuild the figure into drawio. Do not use for TikZ-only, Inkscape-only, raw matplotlib-only, arbitrary PNG/PDF spacing cleanup, slide decks, schematic sketches, or non-paper diagrams."
 ---
 
 # sci-figure — semantic conference-figure workflow
@@ -66,7 +66,7 @@ to the drawio file, not deliverables in their own right.
 ```bash
 # Once per project
 bash <SKILL>/scripts/bootstrap_env.sh
-# This also clones .agents/skills/drawio-skill/ if the backend bundle is missing.
+# This also best-effort clones the optional drawio-skill backend bundle.
 
 # Once per new figure (replace <name>)
 bash <SKILL>/scripts/new_figure.sh <name>
@@ -89,7 +89,10 @@ output, or other Electron startup symptoms inside a sandbox, run
 `make xml` first. If the `.drawio` builds and `verify_aspect_ratios`
 passes, treat the issue as an export-environment problem, not figure
 corruption. Rerun export with escalation / outside the sandbox only
-when a PNG review file is required.
+when a PNG review file is required. If the optional drawio-skill
+backend bundle is installed, consult it for CLI/export
+troubleshooting; if it is absent, continue with XML-only generation
+and report the export limitation.
 
 ## Workflow (5 phases)
 
@@ -248,6 +251,10 @@ resolution, export flags, MathJax/export quirks, shape search,
 fallback URLs, and troubleshooting. Do not copy its general
 box-and-arrow workflow into scientific figure design.
 
+The skill degrades gracefully without this bundle. Figure generation,
+asset rendering, and `.drawio` compilation still work; only the
+export-troubleshooting reference is unavailable.
+
 To refresh that backend adapter from upstream:
 
 ```bash
@@ -257,7 +264,16 @@ bash <SKILL>/scripts/refresh_drawio_skill.sh
 The default refresh updates the nested `skills/drawio-skill/SKILL.md`.
 Use `--bundle` to overlay the full upstream bundle without deleting
 local files. During first deployment, `bootstrap_env.sh` clones the
-bundle automatically when `.agents/skills/drawio-skill/` is missing.
+bundle automatically when `.agents/skills/drawio-skill/` is missing,
+but a failed clone is a warning unless
+`SCI_FIGURE_REQUIRE_DRAWIO_BACKEND=1` is set.
+
+## Maintenance
+
+When editing the frontmatter `description`, check
+`references/trigger-evals.md` against realistic boundary prompts. The
+description is the trigger switch; body text cannot rescue an
+under-triggered skill.
 
 ## Anti-patterns
 

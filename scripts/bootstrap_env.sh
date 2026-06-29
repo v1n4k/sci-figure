@@ -2,9 +2,12 @@
 # bootstrap_env.sh — set up a project's .venv with the sci-figure stack.
 #
 # Behaviour:
-# - Ensures the sibling ``.agents/skills/drawio-skill/`` backend bundle
-#   exists. If missing, clone it from upstream. Set
-#   ``SCI_FIGURE_REFRESH_DRAWIO=1`` to overlay-refresh an existing bundle.
+# - Best-effort installs the optional sibling
+#   ``.agents/skills/drawio-skill/`` backend bundle. If missing, try to
+#   clone it from upstream. Set ``SCI_FIGURE_REFRESH_DRAWIO=1`` to
+#   overlay-refresh an existing bundle. Set
+#   ``SCI_FIGURE_REQUIRE_DRAWIO_BACKEND=1`` to make backend setup
+#   fail-fast instead of warning and continuing.
 # - Ready-check first: if the existing .venv can already import every
 #   required package, print "ready" and exit 0. No reinstall, no churn.
 # - Otherwise: detect uv first (≈10× faster install); fall back to
@@ -31,39 +34,53 @@ VENV="$PROJECT_ROOT/.venv"
 DRAWIO_REPO="https://github.com/Agents365-ai/drawio-skill.git"
 DRAWIO_DIR="$PROJECT_ROOT/.agents/skills/drawio-skill"
 DRAWIO_SKILL_MD="$DRAWIO_DIR/skills/drawio-skill/SKILL.md"
+REQUIRE_DRAWIO_BACKEND="${SCI_FIGURE_REQUIRE_DRAWIO_BACKEND:-0}"
 
 cd "$PROJECT_ROOT"
 
 # ---------- 1. Backend adapter check ----------
+drawio_backend_problem() {
+  local message="$1"
+  if [[ "$REQUIRE_DRAWIO_BACKEND" == "1" ]]; then
+    echo "[bootstrap] error: $message" >&2
+    exit 1
+  fi
+  echo "[bootstrap] warning: $message" >&2
+  echo "[bootstrap] continuing without optional drawio-skill backend; figure XML generation still works." >&2
+  return 0
+}
+
 ensure_drawio_backend() {
   if [[ -f "$DRAWIO_SKILL_MD" ]]; then
     echo "[bootstrap] drawio-skill backend present at $DRAWIO_DIR"
     if [[ "${SCI_FIGURE_REFRESH_DRAWIO:-0}" == "1" ]]; then
       echo "[bootstrap] SCI_FIGURE_REFRESH_DRAWIO=1 — refreshing drawio backend"
-      bash "$SKILL_DIR/scripts/refresh_drawio_skill.sh" --bundle
+      if ! bash "$SKILL_DIR/scripts/refresh_drawio_skill.sh" --bundle; then
+        drawio_backend_problem "failed to refresh optional drawio-skill backend."
+      fi
     fi
     return 0
   fi
 
   if ! command -v git >/dev/null 2>&1; then
-    echo "[bootstrap] drawio-skill backend missing and git is not installed." >&2
-    echo "[bootstrap] install git or clone $DRAWIO_REPO into $DRAWIO_DIR manually." >&2
-    exit 1
+    drawio_backend_problem "drawio-skill backend missing and git is not installed; install git or clone $DRAWIO_REPO into $DRAWIO_DIR manually for export-troubleshooting references."
+    return 0
   fi
 
   if [[ -e "$DRAWIO_DIR" ]]; then
-    echo "[bootstrap] drawio backend directory exists but nested SKILL.md is missing:" >&2
-    echo "            $DRAWIO_DIR" >&2
-    echo "[bootstrap] refusing to overwrite it; fix/remove the directory or run refresh manually." >&2
-    exit 1
+    drawio_backend_problem "drawio backend directory exists but nested SKILL.md is missing at $DRAWIO_SKILL_MD; fix/remove the directory or run refresh manually for backend references."
+    return 0
   fi
 
   echo "[bootstrap] drawio-skill backend missing; cloning $DRAWIO_REPO"
   mkdir -p "$(dirname "$DRAWIO_DIR")"
-  git clone --depth 1 "$DRAWIO_REPO" "$DRAWIO_DIR"
+  if ! git clone --depth 1 "$DRAWIO_REPO" "$DRAWIO_DIR"; then
+    drawio_backend_problem "failed to clone optional drawio-skill backend from $DRAWIO_REPO."
+    return 0
+  fi
   if [[ ! -f "$DRAWIO_SKILL_MD" ]]; then
-    echo "[bootstrap] clone completed but nested drawio SKILL.md was not found." >&2
-    exit 1
+    drawio_backend_problem "clone completed but nested drawio SKILL.md was not found at $DRAWIO_SKILL_MD."
+    return 0
   fi
 }
 

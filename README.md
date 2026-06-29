@@ -41,9 +41,9 @@ install both skills and the Python environment, end to end:
 >    installed (`which uv`); if either is missing, stop and tell me
 >    how to install it for my OS rather than guessing.
 > 4. Run `bash .agents/skills/sci-figure/scripts/bootstrap_env.sh`
->    from the project root — this clones the sibling `drawio-skill`
->    backend if missing, creates `.venv/`, and installs
->    `sci_figure_lib` plus the Tier 1 plotting stack.
+>    from the project root — this creates `.venv/`, installs
+>    `sci_figure_lib` plus the Tier 1 plotting stack, and best-effort
+>    clones the optional sibling `drawio-skill` backend if missing.
 > 5. Confirm the install by importing `sci_figure_lib` inside `.venv`
 >    and printing its version.
 > Don't start a figure yet — wait until I describe the manuscript.
@@ -54,17 +54,26 @@ This skill **references** but does not vendor the upstream
 [drawio-skill](https://github.com/Agents365-ai/drawio-skill) bundle
 (CLI invocation patterns, export pitfalls, shape search, MathJax
 delimiter rules, fallback URLs).
-It must live at exactly:
+This bundle is optional convenience, not a generation dependency: the
+skill degrades gracefully without it and only loses
+export-troubleshooting reference material, not asset rendering or
+`.drawio` generation.
+
+When installed, it should live at:
 
 ```
 .agents/skills/drawio-skill/
 ```
 
-— a sibling of this skill's directory. The skill resolves its
-references through that path; do not move or rename it.
+— a sibling of this skill's directory. The skill resolves optional
+references through that path; if you move or rename it, those
+references simply won't be available.
 
-`bootstrap_env.sh` installs this bundle automatically when it is
-missing. To install it manually:
+`bootstrap_env.sh` tries to install this bundle automatically when it
+is missing. If git/network access is unavailable, it prints a warning
+and continues installing the sci-figure Python environment. To require
+this backend strictly, set `SCI_FIGURE_REQUIRE_DRAWIO_BACKEND=1`. To
+install it manually:
 
 ```bash
 git clone https://github.com/Agents365-ai/drawio-skill.git \
@@ -82,10 +91,11 @@ bash .agents/skills/sci-figure/scripts/refresh_drawio_skill.sh
 bash .agents/skills/sci-figure/scripts/refresh_drawio_skill.sh --bundle
 ```
 
-The script requires `.agents/skills/drawio-skill/` to already exist;
-it refuses to create it from scratch (so a typo can't silently
-overwrite something else). To force-refresh an existing backend during
-bootstrap:
+The refresh script requires `.agents/skills/drawio-skill/` to already
+exist because refreshing is backend maintenance, not a prerequisite
+for figure generation. It refuses to create the directory from scratch
+so a typo can't silently overwrite something else. To force-refresh an
+existing backend during bootstrap:
 
 ```bash
 SCI_FIGURE_REFRESH_DRAWIO=1 \
@@ -148,4 +158,4 @@ candidates and implements your choice; design taste belongs to you.
 
 `SKILL.md` has the workflow at high level; `references/*.md` have the
 details (quality bar, asset strategy, notation, layout, typography,
-review-render bounds, anti-patterns).
+review-render bounds, trigger evals, anti-patterns).

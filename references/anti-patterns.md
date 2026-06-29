@@ -152,6 +152,6 @@ figure's outputs.
   Rename and remove before committing.
 - **Committing the full-resolution drawio CLI PNG** to the repo if
   it's > 5 MB. Commit the `.drawio` source plus the exported PDF.
-- **Modifying `.agents/skills/drawio-skill/`** locally. That bundle
-  tracks upstream; refresh via
+- **Modifying `.agents/skills/drawio-skill/`** locally when the
+  optional backend bundle is installed. It tracks upstream; refresh via
   `bash .agents/skills/sci-figure/scripts/refresh_drawio_skill.sh`.
