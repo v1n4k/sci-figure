@@ -36,6 +36,12 @@ helpers into `scripts/<name>/` (they belong in the skill's `lib/`);
 don't keep stale debug PNGs in `assets/` or `artifacts/`. Full
 folder-hygiene rules: `references/anti-patterns.md`.
 
+`requirements.md` is created by `new_figure.sh` from the skill's
+template. The user does not need to provide it up front. Treat it as a
+per-figure decision log that the agent fills and updates during design
+discussion, implementation, review, and handoff. If the user already
+has requirements, paste or merge them into this file.
+
 ## Deliverable
 
 Two files per figure, no more:
@@ -95,16 +101,18 @@ when a PNG review file is required.
 2. **Design — explore, then human selects.** Treat the conventions
    in `references/layout.md` as a *menu of patterns* and the entries
    in `references/exemplars/` as concrete top-conference figures
-   demonstrating those patterns. This phase is **explicitly
-   human-in-the-loop**: the agent generates ≥ 3 distinct layout
-   candidates (different patterns from the menu, ideally each citing
-   an exemplar with a similar conceptual structure), presents them
-   in a comparable per-candidate spec with focal-point alignment +
-   trade-offs, and asks the human to pick. The agent does **not**
-   pick the winner — design taste belongs to whoever knows the
-   paper, the audience, and the venue. The human picks one, asks
-   for a hybrid, or asks for another round; the agent implements
-   the chosen design. Format and example responses:
+   demonstrating those patterns. For a new main figure or an ambiguous
+   redesign, generate ≥ 3 distinct layout candidates (different
+   patterns from the menu, ideally each citing an exemplar with a
+   similar conceptual structure), present them in a comparable
+   per-candidate spec with focal-point alignment + trade-offs, and ask
+   the human to pick. For a targeted revision to an existing figure,
+   do **not** force three candidates; preserve the chosen design and
+   propose the smallest coherent patch unless the human asks to reopen
+   layout exploration. The agent does **not** pick the winner — design
+   taste belongs to whoever knows the paper, the audience, and the
+   venue. The human picks one, asks for a hybrid, or asks for another
+   round; the agent implements the chosen design. Format and example responses:
    `references/design.md`. The only fixed inputs are the invariants
    in *Quality bar* below; everything else (panel count, arrangement,
    sub-panels, palette, page geometry, glyph repertoire, asset
@@ -124,26 +132,32 @@ when a PNG review file is required.
 5. **Refine** — drawio cells tweak by hand or via the script;
    PNG assets re-render only when the underlying data story changes.
 
-## Quality bar — these are the only invariants
+## Quality bar — strong defaults, not dogma
 
-Everything below survives across every paper, every layout, every
-asset combination. Anything *not* listed here (panel count,
-arrangement, sub-panels, palette concepts, glyph types, page geometry,
-library combinations) is a design choice you make from the paper.
+Everything below is a strong default for conference method figures,
+not a mechanical law. If a paper genuinely needs an exception, record
+the reason in `requirements.md`, make the exception visually legible,
+and keep the figure's main message image-first.
 
 - **Math stays subordinate to the picture.** Single-symbol labels and
   short one-line definitions are fine when they reduce text or anchor
   a visual element. Avoid derivation blocks, equation chains, and math
   whose main job is to be read rather than recognised.
-- **Zero specific numeric values** anywhere. Bar height, line
-  thickness, fill saturation, glyph length carry magnitude.
-- **Zero derivation chains.** Collapse 3 + chained intermediates into
-  a single visual flow that lands on one summary element.
-- **Zero notation glossaries** or mechanics boxes (`softmax`,
-  `normalize`, …). Show what an operator *produces*, not its name.
-- **Fixed palette per figure with no colour reuse across concepts.**
-  Pick the palette from the paper's ontology (the actual concepts the
-  paper distinguishes); do not import a generic palette.
+- **Prefer visual quantities over numeric labels.** Bar height, line
+  thickness, fill saturation, glyph length, position, or area should
+  carry magnitude. Use a number only when it is itself the visual claim
+  and no glyph would be clearer.
+- **Avoid derivation chains.** Collapse chained intermediates into a
+  visual flow that lands on one summary element. Keep algebraic detail
+  in the paper unless a single one-line definition makes the picture
+  easier to read.
+- **Avoid notation glossaries and mechanics boxes** (`softmax`,
+  `normalize`, …). Show what an operator *produces*, not its name,
+  unless naming it prevents a worse ambiguity.
+- **Keep palette semantics stable within a figure.** Pick colours from
+  the paper's ontology and avoid reusing a colour for unrelated
+  concepts. Explore alternatives before locking the mapping; do not
+  import a generic palette.
 - **5-second skim test** passes per panel.
 - **Demonstration over numeric calculation** — visual encoding always
   beats annotated numbers.

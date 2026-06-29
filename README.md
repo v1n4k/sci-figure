@@ -104,7 +104,9 @@ make figure  # export review PNG when drawio CLI is available
 
 Two stubs — `generate_assets.py` and `generate_figure.py` — plus a
 `requirements.md` decision log land in `scripts/<name>/`. Edit those.
-The lib stays in the skill.
+The lib stays in the skill. You do not need to bring your own
+`requirements.md`; the scaffold creates it, and the agent keeps it
+updated as design choices are made.
 
 ## Workflow
 
@@ -123,9 +125,11 @@ candidates and implements your choice; design taste belongs to you.
 
 - **Read paper** — agent extracts the single novelty, conceptual
   structure, and notation symbols from the manuscript.
-- **Design** — agent presents ≥ 3 distinct layout candidates from
-  `references/layout.md`, each citing an exemplar with similar
-  conceptual structure. **Agent does not pick the winner.**
+- **Design** — for a new main figure or ambiguous redesign, the agent
+  presents ≥ 3 distinct layout candidates from `references/layout.md`,
+  each citing an exemplar with similar conceptual structure. For a
+  targeted revision, it proposes a local patch instead. **Agent does
+  not pick the winner.**
 - **YOU** — pick one, ask for a hybrid, or ask for another round.
 - **Log requirements** — `requirements.md` records palette semantics,
   arrow meanings, asset/drawio boundary, and handoff state.

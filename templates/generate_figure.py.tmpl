@@ -4,6 +4,10 @@
 Independent of generate_assets.py: imports nothing from matplotlib. Reads
 PNGs from ../../assets/__FIGURE_NAME__/ and writes ../../artifacts/.
 
+This file is a runnable scaffold, not a recommended layout. Replace the
+demo rows, panel titles, colours, glyphs, and readout structure with the
+design selected in requirements.md before treating the figure as real.
+
 Outputs:
   ../../artifacts/__FIGURE_NAME__.drawio        ← authoritative (open in app)
   ../../artifacts/__FIGURE_NAME__.drawio.png    ← full-resolution CLI export
@@ -34,8 +38,9 @@ OUT = OUT_DIR / "__FIGURE_NAME__.drawio"
 
 
 # ---------- Project-specific palette --------------------------------------
-# Define the figure's semantic colours HERE, not in the skill lib. Keep one
-# colour per concept; do not reuse a colour for unrelated semantics.
+# Placeholder colours, provided only so the scaffold compiles. Rename these
+# keys around the figure's actual ontology in requirements.md; do not treat
+# primary/secondary/accent as a house style.
 COLORS: dict[str, str] = {
     "ink": "#1F2937",
     "muted": "#64748B",
@@ -57,7 +62,9 @@ def build(d: FigureBuilder) -> str:
 
     Use ``requirements.md`` beside this script as the source of truth for
     palette semantics, arrow meanings, asset/drawio boundaries, and handoff
-    notes. Return a useful anchor id for audits, or ``''`` if none.
+    notes. The body below is deliberately a generic compiling demo; replace
+    it with the chosen design rather than polishing it into a default style.
+    Return a useful anchor id for audits, or ``''`` if none.
     """
     page = Rect(40, 24, 3320, 1240)
 

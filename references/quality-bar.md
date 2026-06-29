@@ -1,9 +1,11 @@
-# Quality Bar — the only invariants
+# Quality Bar — strong defaults, not dogma
 
-These survive across every paper, every layout, every asset
-combination. Anything not listed here (panel arrangement, sub-panels,
-palette concepts, glyph types, page geometry, library combinations)
-is a design choice you derive from the paper.
+These defaults fit most AI/ML method figures. They are not a religion:
+when a paper genuinely needs an exception, record the reason in
+`requirements.md`, make the exception visually legible, and keep the
+main message image-first. Anything not listed here (panel arrangement,
+sub-panels, palette concepts, glyph types, page geometry, library
+combinations) is a design choice you derive from the paper.
 
 ## 1. Math supports the picture, not the reverse
 
@@ -24,10 +26,10 @@ Practical guidance:
   appears.
 - Keep definitions rare. If the figure starts to look like a notation
   sheet, replace math with visual encoding or move detail to the paper.
-- **Zero derivation chains.** `a → b → c → d` developed across cells
-  belongs in the paper text, never in the figure.
-- **Zero manipulated identities.** No "= reduces to ... = simplifies
-  to ...". One side of an equals sign at most.
+- Avoid derivation chains. `a → b → c → d` developed across cells
+  usually belongs in the paper text, not the figure.
+- Avoid manipulated identities. No "= reduces to ... = simplifies
+  to ..." unless the transformation itself is the visual claim.
 - Single-symbol inline notation labels on arrows / glyphs / captions
   (`L_r`, `β_x`, `D_f`, `μ_{ℓ,c}`, `\tilde P`) are not equations and
   don't count toward the limit.
@@ -38,38 +40,43 @@ line* defining a symbol can be recognised quickly and add explanatory
 power; a *block* of math forces real reading and steals attention from
 the visual story.
 
-## 2. No specific numeric values
+## 2. Prefer visual quantities over numeric labels
 
-No `0.62`, no `α = 0.55`, no axis-tick numbers on probability bars,
-no percentages baked into a glyph. **Bar height, line thickness, fill
-saturation, gauge needle position, glyph length** carry magnitude.
+Avoid `0.62`, `α = 0.55`, axis-tick numbers on probability bars, and
+percentages baked into glyphs when a visual encoding can carry the
+magnitude. Prefer **bar height, line thickness, fill saturation, gauge
+needle position, glyph length, position, or area**.
 
-Why: numbers force the reader to compare digits across panels instead
-of comparing visual quantities at a glance. They also imply a
-precision that an illustrative figure does not have.
+Use a number only when it is itself the visual claim or when removing
+it would make the figure less honest.
 
-## 3. No derivation chains
+Why: numbers often force the reader to compare digits across panels
+instead of comparing visual quantities at a glance. They also imply a
+precision that many illustrative figures do not have.
+
+## 3. Avoid derivation chains
 
 If a quantity is defined by 3 + chained intermediates (`a → b → c → d`),
 collapse the chain to a single visual flow that lands on one summary
-element. Intermediate symbols stay in the paper text.
+element. Intermediate symbols usually stay in the paper text.
 
-## 4. No notation glossaries or mechanics boxes
+## 4. Avoid notation glossaries or mechanics boxes
 
-No legend table inside the figure body. No labelled boxes for
+Avoid legend tables inside the figure body. Avoid labelled boxes for
 operators that just name an operation: `softmax`, `normalize`,
 `cosine`, `linear`. Show what an operator *produces* (a probability
-bar, a similarity fan, a scalar gauge), not its name.
+bar, a similarity fan, a scalar gauge), not its name. Keep a name only
+when omitting it would create a worse ambiguity.
 
 Symbols introduced in the figure get a colour tag plus a one-line
 semantic caption on the panel where they first appear.
 
-## 5. Fixed palette per figure with no colour reuse
+## 5. Stable palette semantics within each figure
 
 Pick the palette **from the paper's ontology** — the actual concepts
-the paper distinguishes. Encode it once in the per-figure script's
-`COLORS` dict and never reuse a colour for an unrelated concept
-within the figure.
+the paper distinguishes. Explore alternatives, then encode the chosen
+mapping in the per-figure script's `COLORS` dict. Avoid reusing a
+colour for unrelated concepts within the figure.
 
 Examples of paper-driven ontologies (each picks its own colours, none
 of these is a default):

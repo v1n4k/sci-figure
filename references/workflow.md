@@ -18,22 +18,27 @@ Before drawing anything:
   territory** (boxes, arrows, glyphs, captions, math notation, the
   reading order between elements).
 - Start `scripts/<figure>/requirements.md` as soon as the figure name
-  exists. Treat it as the decision log for palette semantics, arrow
-  meanings, asset/drawio territory, stacked quantities, final readout
-  semantics, and handoff status.
+  exists. `new_figure.sh` creates this file from a template; the user
+  does not need to provide it beforehand. Treat it as the decision log
+  that the agent and user maintain together for palette semantics,
+  arrow meanings, asset/drawio territory, stacked quantities, final
+  readout semantics, and handoff status.
 
-## Phase 2 — Design (explore, then human selects)
+## Phase 2 — Design (explore when needed, then human selects)
 
 Treat the conventions in `layout.md` as a **menu**. Different papers
 want different shapes.
 
-This phase is **explicitly human-in-the-loop**. The agent's job is to
-**generate** several layout candidates and **present** them; the
-human's job is to **select** which to develop. The agent does not
-pick the winner — design taste belongs to the person who knows the
-paper, the audience, and the venue.
+This phase is **explicitly human-in-the-loop**. For a new main figure
+or ambiguous redesign, the agent's job is to **generate** several
+layout candidates and **present** them; the human's job is to
+**select** which to develop. For a targeted revision to an existing
+figure, do not manufacture alternatives just to satisfy a count:
+preserve the chosen layout, explain the narrow patch, and continue.
+The agent does not pick the winner — design taste belongs to the
+person who knows the paper, the audience, and the venue.
 
-### Step A. Agent generates ≥ 3 layout candidates
+### Step A. Agent generates ≥ 3 layout candidates for new designs
 
 Each candidate is a *rough* design sketch (text + ASCII layout, not
 implementation), informed by the paper's conceptual structure from
@@ -51,6 +56,11 @@ For each candidate the agent works out internally:
 - What the candidate trades off (e.g. "scales for complex methods
   but feels busy", "clean for single-thread stories but bad for
   branching")
+
+For a small revision, replace Step A with a patch note:
+- current design element being changed;
+- why the change is local rather than a full redesign;
+- what semantic or layout risk to check after the patch.
 
 ### Step B. Agent presents candidates to the human
 

@@ -13,7 +13,9 @@ explore.
 > `[A][B][C]`, specific palette concepts, specific glyphs, specific
 > page geometry — is one option among many.
 
-The only invariants are in `quality-bar.md`. Everything else is yours.
+The strong defaults are in `quality-bar.md`. Everything else is yours,
+and even those defaults can bend when the paper's visual argument
+requires it.
 
 ## Read the paper deeply (before anything else)
 
@@ -67,11 +69,15 @@ with one annotated geometric story is sometimes the right answer.
 ## Sketch candidates, present them, let the human pick
 
 Phase 2 is a **human-in-the-loop** step. The agent does not pick the
-winner. The agent's job is breadth (generate genuinely different
-candidates and surface their trade-offs); the human's job is taste
-(decide which one fits the paper, the audience, the venue).
+winner. For a new main figure or ambiguous redesign, the agent's job
+is breadth (generate genuinely different candidates and surface their
+trade-offs); the human's job is taste (decide which one fits the paper,
+the audience, the venue). For a targeted revision to an already chosen
+figure, breadth is usually waste: keep the current design and propose
+the smallest coherent change unless the human asks to reopen layout
+exploration.
 
-### Generate ≥ 3 candidates spread across patterns
+### Generate ≥ 3 candidates for new or ambiguous designs
 
 1. Pick three (or more) **different** layout patterns from the table
    above. Three near-identical 3-column variants is not exploration.
@@ -94,6 +100,11 @@ candidates and surface their trade-offs); the human's job is taste
 
 If a candidate fails an invariant in a way that can't be fixed
 without changing the pattern, drop it and generate another.
+
+For small revisions, skip this candidate-generation step. State the
+local issue, the intended patch, and any trade-off it creates; then
+implement after the human agrees or when the request is already
+specific.
 
 ### Present to the human in a comparable format
 
