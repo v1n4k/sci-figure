@@ -6,6 +6,11 @@
   truth; manual edits get clobbered on the next regen. Edit the
   generator instead. (Tweaking individual cell positions in the drawio
   app for fine-tuning is fine — but don't add or rename cells there.)
+- **Regenerating over a hand-tuned drawio without recording the handoff.**
+  Once the user has started final spacing / arrow / label edits in the
+  drawio app, record that state in `requirements.md`. Either fold those
+  edits back into `generate_figure.py` before regenerating, or agree
+  explicitly that the hand-tuned state will be replaced.
 - **Running both stages in one script** so a layout-only change
   re-renders every PNG. Keep `generate_assets.py` and
   `generate_figure.py` independent — that's the whole point of the
@@ -28,6 +33,10 @@
   through them.
 - **Long arrows that cross unrelated cells.** Either route through
   a gutter or restructure the layout.
+- **Connector hairballs for semantic relations.** Use wrappers,
+  block arrows, readout lists, and grouping boxes when the visual
+  relation is "iterates with", "read out after convergence", or
+  "belongs to this mechanism", not a literal point-to-point flow.
 
 ## Notation
 

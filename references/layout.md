@@ -20,6 +20,7 @@ Different conceptual structures suggest different patterns:
 | Iterative / rollout (time evolution) | Horizontal time-axis with snapshots |
 | Hierarchical / multi-scale | Vertical stack with nested boxes |
 | **Training vs inference (shared learned object)** | **Two horizontal rows with shared element drawn identically in both; mid-figure colour legend doubles as row separator. See `exemplars/two-row-training-inference.md`.** |
+| **Failure mechanism vs controlled fix** | **Two horizontal rows: a grouped failure loop above, then setup → iterative core → final readout below. See `exemplars/two-row-failure-fix-iterative-readout.md`.** |
 
 The list is not exhaustive. Invent a layout when none of these fits.
 
@@ -66,6 +67,31 @@ dense mechanism panels with many edges.
 If an arrow has to cross an unrelated element to reach its target,
 either the gutter is too narrow or the layout itself is wrong —
 restructure rather than letting the arrow cross.
+
+For iterative methods, do not let arrow grammar imply a one-pass
+pipeline unless the method is actually one-pass. When two panels update
+each other, wrap them as an iterative core or draw a clear return path.
+Keep the final prediction / readout panel outside that core when it is
+only valid after convergence.
+
+## Prefer semantic grouping over connector hairballs
+
+Do not make every relation an explicit routed arrow. In dense scientific
+figures, connector complexity often harms the claim.
+
+Use these higher-level encodings first:
+- `wrapper_box` for iterative cores, grouped failure loops, and shared
+  mechanism regions;
+- `block_arrow` for high-level separation, propagation, or readout when
+  a thin connector would over-specify causality;
+- `readout_list` for final uses such as prediction, label, or soft
+  target, instead of several internal output arrows;
+- colour-coded panels or side labels when the relation is membership,
+  not data flow.
+
+Use routed connectors only when the paper genuinely needs point-to-point
+flow. If a connector needs more than two waypoints to avoid unrelated
+objects, first try a wrapper, a block arrow, or a layout change.
 
 ## Square thumbnails
 

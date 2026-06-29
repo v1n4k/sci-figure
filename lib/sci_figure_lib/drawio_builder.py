@@ -3,6 +3,8 @@
 Project-agnostic. Provides only the stable, generic API:
 - ``cell``, ``image``, ``thumb_cell``, ``edge``, ``write`` (XML primitives)
 - ``sub_panel`` (titled rounded-rect container with [A]/[B]/... tag)
+- ``cell_rect``, ``panel_box``, ``wrapper_box``, ``block_arrow`` (semantic
+  figure-layout helpers that accept ``sci_figure_lib.layout.Rect``)
 - ``tex_cell`` (drawio MathJax with the ``\\(...\\)`` delimiters drawio
   actually accepts — see ``sci-figure/references/notation.md``)
 - ``math_cell`` (HTML + Unicode escape hatch for figures that must avoid
@@ -23,6 +25,8 @@ from pathlib import Path
 from xml.etree import ElementTree as ET
 
 from PIL import Image
+
+from sci_figure_lib.layout import Rect
 
 DEFAULT_FONT = "Helvetica"
 DEFAULT_INK = "#1F2937"
@@ -126,6 +130,17 @@ class DrawioBuilder:
             {"x": str(x), "y": str(y), "width": str(w), "height": str(h), "as": "geometry"},
         )
         return cid
+
+    def cell_rect(
+        self,
+        value: str,
+        rect: Rect,
+        style: str,
+        prefix: str = "node",
+    ) -> str:
+        """Add a generic mxCell using a ``Rect`` instead of raw coordinates."""
+
+        return self.cell(value, rect.x, rect.y, rect.w, rect.h, style, prefix=prefix)
 
     def image(
         self,
@@ -299,7 +314,7 @@ class DrawioBuilder:
         carrying a bold ``[A]`` tag and an italic title. Returns
         ``(panel_id, content_x, content_y, content_w, content_h)``.
 
-        The title may contain inline LaTeX via ``\(...\)`` regions when
+        The title may contain inline LaTeX via ``\\(...\\)`` regions when
         ``math=True`` on the builder (the default).
         """
         tag_col = tag_color or self.DEFAULT_INK
@@ -347,6 +362,133 @@ class DrawioBuilder:
         )
         return bg, x + 12, y + 40, w - 24, h - 50
 
+    def panel_box(
+        self,
+        rect: Rect,
+        title: str,
+        *,
+        tag: str | None = None,
+        fill: str = "#FBFCFD",
+        stroke: str = "#CBD5E1",
+        title_color: str | None = None,
+        level: str = "panel",
+        prefix: str = "panel",
+    ) -> tuple[str, Rect]:
+        """Semantic titled panel with stroke width derived from hierarchy.
+
+        ``level`` is a visual hierarchy hint: ``row`` is strongest,
+        ``panel`` is medium, ``inner`` is thin. Returns the background id
+        and the content rect.
+        """
+
+        widths = {"row": 2.4, "panel": 1.8, "inner": 1.1}
+        stroke_width = widths.get(level, 1.8)
+        bg = self.cell_rect(
+            "",
+            rect,
+            f"rounded=1;arcSize=6;whiteSpace=wrap;html=1;"
+            f"fillColor={fill};strokeColor={stroke};strokeWidth={stroke_width};",
+            prefix=f"{prefix}_bg",
+        )
+        header_h = 38
+        tag_w = 0
+        if tag:
+            tag_w = 58
+            self.cell(
+                tag,
+                rect.x + 12,
+                rect.y + 7,
+                tag_w,
+                26,
+                "text;html=1;strokeColor=none;fillColor=none;whiteSpace=wrap;"
+                f"fontFamily={self.font};fontSize=22;fontColor={stroke};fontStyle=1;"
+                "align=left;verticalAlign=middle;",
+                prefix=f"{prefix}_tag",
+            )
+        self.cell(
+            title,
+            rect.x + 14 + tag_w,
+            rect.y + 7,
+            rect.w - tag_w - 28,
+            28,
+            "text;html=1;strokeColor=none;fillColor=none;whiteSpace=wrap;"
+            f"fontFamily={self.font};fontSize=24;"
+            f"fontColor={title_color or self.DEFAULT_INK};fontStyle=1;"
+            "align=left;verticalAlign=middle;",
+            prefix=f"{prefix}_title",
+        )
+        return bg, rect.inset(14, header_h, 14, 14)
+
+    def wrapper_box(
+        self,
+        rect: Rect,
+        label: str = "",
+        *,
+        fill: str = "#FFFFFF",
+        stroke: str = "#CBD5E1",
+        stroke_width: float = 1.4,
+        dashed: bool = False,
+        prefix: str = "wrap",
+    ) -> str:
+        """Lightweight semantic wrapper for iterative cores or grouped loops."""
+
+        dash = "dashed=1;dashPattern=10 6;" if dashed else ""
+        bg = self.cell_rect(
+            "",
+            rect,
+            f"rounded=1;arcSize=8;whiteSpace=wrap;html=1;"
+            f"fillColor={fill};strokeColor={stroke};strokeWidth={stroke_width};{dash}",
+            prefix=f"{prefix}_bg",
+        )
+        if label:
+            self.cell(
+                label,
+                rect.x + 14,
+                rect.y + 8,
+                max(40, rect.w - 28),
+                24,
+                "text;html=1;strokeColor=none;fillColor=none;whiteSpace=wrap;"
+                f"fontFamily={self.font};fontSize=20;fontColor={stroke};fontStyle=1;"
+                "align=left;verticalAlign=middle;",
+                prefix=f"{prefix}_label",
+            )
+        return bg
+
+    def block_arrow(
+        self,
+        rect: Rect,
+        *,
+        direction: str = "east",
+        start_color: str = "#2563EB",
+        end_color: str = "#7E22CE",
+        label: str = "",
+        font_color: str = "#FFFFFF",
+        prefix: str = "block_arrow",
+    ) -> str:
+        """Draw a broad semantic arrow with a fill gradient.
+
+        Use this when the relation is a high-level separation, readout, or
+        propagation, and a routed connector would over-specify causality.
+        """
+
+        gradient_direction = {
+            "east": "east",
+            "west": "west",
+            "north": "north",
+            "south": "south",
+        }.get(direction, "east")
+        rotation = {"east": 0, "south": 90, "west": 180, "north": 270}.get(
+            direction, 0
+        )
+        style = (
+            "shape=singleArrow;whiteSpace=wrap;html=1;rounded=1;"
+            f"fillColor={start_color};gradientColor={end_color};"
+            f"gradientDirection={gradient_direction};strokeColor=none;"
+            f"fontFamily={self.font};fontSize=20;fontColor={font_color};fontStyle=1;"
+            f"rotation={rotation};"
+        )
+        return self.cell_rect(label, rect, style, prefix=prefix)
+
     # ---------- edges ----------
 
     def edge(
@@ -361,6 +503,8 @@ class DrawioBuilder:
         font_size: int = 22,
         exit_point: str | None = None,
         entry_point: str | None = None,
+        points: list[tuple[float, float]] | None = None,
+        label_offset: tuple[float, float] | None = None,
     ) -> str:
         """Add an orthogonal edge between two cell ids."""
         cid = self._id(prefix)
@@ -392,7 +536,14 @@ class DrawioBuilder:
                 "target": target,
             },
         )
-        ET.SubElement(edge, "mxGeometry", {"relative": "1", "as": "geometry"})
+        geom = ET.SubElement(edge, "mxGeometry", {"relative": "1", "as": "geometry"})
+        if points:
+            arr = ET.SubElement(geom, "Array", {"as": "points"})
+            for px, py in points:
+                ET.SubElement(arr, "mxPoint", {"x": str(px), "y": str(py)})
+        if label_offset:
+            ox, oy = label_offset
+            ET.SubElement(geom, "mxPoint", {"x": str(ox), "y": str(oy), "as": "offset"})
         return cid
 
     # ---------- emit ----------

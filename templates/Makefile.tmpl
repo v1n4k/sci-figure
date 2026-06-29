@@ -3,16 +3,20 @@
 
 PYTHON ?= python
 
-.PHONY: assets figure all clean help
+.PHONY: assets xml figure all clean help
 
 help:
 	@echo "  make assets   — render PNG assets (matplotlib)"
+	@echo "  make xml      — build the drawio XML only, no CLI export"
 	@echo "  make figure   — build the drawio (reads existing PNGs)"
 	@echo "  make all      — assets + figure"
 	@echo "  make clean    — delete generated assets and artifacts"
 
 assets:
 	$(PYTHON) generate_assets.py
+
+xml:
+	SCI_FIGURE_SKIP_EXPORT=1 $(PYTHON) generate_figure.py
 
 figure:
 	$(PYTHON) generate_figure.py

@@ -50,3 +50,6 @@ pattern over one that's similar to existing entries.
 - `two-row-training-inference.md` — TRAINING vs INFERENCE two-row
   split; shared learned-object across rows; mid-figure colour legend
   serving as row separator.
+- `two-row-failure-fix-iterative-readout.md` — two-row failure/fix
+  narrative; grouped failure loop above, iterative method core plus
+  converged readout below.

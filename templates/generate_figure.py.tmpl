@@ -12,11 +12,13 @@ Outputs:
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
 from sci_figure_lib.drawio_builder import DrawioBuilder
 from sci_figure_lib.glyphs import GlyphMixin
+from sci_figure_lib.layout import Rect
 from sci_figure_lib.render import (
     cli_export,
     make_review_png,
@@ -32,11 +34,16 @@ OUT = OUT_DIR / "__FIGURE_NAME__.drawio"
 
 
 # ---------- Project-specific palette --------------------------------------
-# Define the figure's semantic colours HERE, not in the skill lib.
+# Define the figure's semantic colours HERE, not in the skill lib. Keep one
+# colour per concept; do not reuse a colour for unrelated semantics.
 COLORS: dict[str, str] = {
-    "ink":   "#1F2937",
-    "muted": "#6B7280",
-    # add more as the figure needs (retain / forget / frozen / trained / target)
+    "ink": "#1F2937",
+    "muted": "#64748B",
+    "local": "#2563EB",
+    "global": "#7E22CE",
+    "state": "#D97706",
+    "neutral_stroke": "#CBD5E1",
+    "neutral_fill": "#FBFCFD",
 }
 
 
@@ -45,23 +52,125 @@ class FigureBuilder(DrawioBuilder, GlyphMixin):
 
 
 def build(d: FigureBuilder) -> str:
-    """Compose the figure. Returns the id of the cell that downstream
-    audits (e.g. cross-phase edges) should anchor on, or '' if none."""
-    # === Title / subtitle ===
+    """Compose the semantic drawio draft.
+
+    Use ``requirements.md`` beside this script as the source of truth for
+    palette semantics, arrow meanings, asset/drawio boundaries, and handoff
+    notes. Return a useful anchor id for audits, or ``''`` if none.
+    """
+    page = Rect(40, 24, 3320, 1240)
+
     d.cell(
         "Method overview",
-        40, 24, 3000, 50,
+        page.x,
+        page.y,
+        page.w,
+        52,
         "text;html=1;strokeColor=none;fillColor=none;whiteSpace=wrap;"
         f"fontFamily={d.font};fontSize=40;fontColor={COLORS['ink']};fontStyle=1;"
         "align=center;verticalAlign=middle;",
     )
-    # === Sub-panels ===
-    panel_a, ax, ay, aw, ah = d.sub_panel(
-        40, 200, 800, 400, "[A]", "Panel A title",
+
+    body = page.inset(0, 120, 0, 0)
+    row_a, row_b = body.split_v([0.44, 0.56], gap=42)
+
+    _, a_inner = d.panel_box(
+        row_a,
+        "context / failure mechanism",
+        tag="[A]",
+        fill="#FFFFFF",
+        stroke="#EF4444",
+        level="row",
+        prefix="row_a",
     )
-    # ... fill panel A using d.image('demo_bar', ...), d.tex_cell('\\beta_x', ...)
-    # ... d.gauge_glyph(...), d.dataset_glyph(...), etc.
-    return panel_a
+    context, mechanism = a_inner.split_h([0.34, 0.66], gap=28)
+    d.wrapper_box(context, "asset territory", fill="#F8FAFC", stroke="#CBD5E1", prefix="context")
+    d.image("demo_scatter", context.x + 42, context.y + 54, h=context.h - 88)
+    d.block_arrow(
+        Rect(context.right + 6, context.cy - 22, 54, 44),
+        start_color="#F87171",
+        end_color="#EF4444",
+        label="",
+        prefix="amplifier",
+    )
+    d.wrapper_box(
+        mechanism,
+        "grouped mechanism",
+        fill="#FFF7F7",
+        stroke="#FCA5A5",
+        dashed=False,
+        prefix="mechanism",
+    )
+    mech_cols = mechanism.inset(26, 58, 26, 28).split_h([1, 1, 1], gap=26)
+    for idx, rect in enumerate(mech_cols):
+        d.distribution_bar_strip(
+            rect.x,
+            rect.y,
+            rect.w,
+            rect.h,
+            ["A", "B", "C"],
+            [0.82 - idx * 0.12, 0.36 + idx * 0.08, 0.18 + idx * 0.06],
+            title=f"failure panel {idx + 1}",
+            color="#EF4444",
+            prefix=f"fail_dist{idx}",
+        )
+
+    panel_b, b_inner = d.panel_box(
+        row_b,
+        "semantic method draft",
+        tag="[B]",
+        fill="#FFFFFF",
+        stroke="#2563EB",
+        level="row",
+        prefix="row_b",
+    )
+    setup, core, readout = b_inner.split_h([0.28, 0.48, 0.24], gap=30)
+    d.wrapper_box(setup, "setup / partition", fill="#F8FAFC", stroke="#2DD4BF", prefix="setup")
+    d.image("demo_bar", setup.x + 28, setup.y + 70, w=setup.w - 56)
+
+    d.wrapper_box(core, "iterative core", fill="#F8FBFF", stroke="#93C5FD", stroke_width=1.8, prefix="core")
+    upper, arrow, lower = core.inset(28, 58, 28, 28).split_v([0.42, 0.16, 0.42], gap=10)
+    d.distribution_bar_strip(
+        upper.x,
+        upper.y,
+        upper.w,
+        upper.h,
+        ["A", "B", "C"],
+        [0.64, 0.46, 0.56],
+        title="controlled evidence",
+        color=COLORS["local"],
+        prefix="evidence",
+    )
+    d.block_arrow(
+        arrow.inset(arrow.w * 0.22, 4, arrow.w * 0.22, 4),
+        start_color=COLORS["local"],
+        end_color=COLORS["global"],
+        label="iterative",
+        prefix="iter_arrow",
+    )
+    d.distribution_bar_strip(
+        lower.x,
+        lower.y,
+        lower.w,
+        lower.h,
+        ["A", "B", "C"],
+        [0.78, 0.25, 0.18],
+        title="posterior state",
+        color=COLORS["global"],
+        prefix="posterior",
+    )
+
+    d.readout_list(
+        readout.x,
+        readout.y + 42,
+        readout.w,
+        readout.h - 84,
+        "converged readout",
+        ["prediction", "soft target"],
+        color=COLORS["global"],
+        prefix="readout",
+    )
+    return panel_b
 
 
 def main() -> int:
@@ -80,6 +189,11 @@ def main() -> int:
     print(f"[figure] wrote → {OUT}")
 
     verify_aspect_ratios(OUT)
+
+    if os.environ.get("SCI_FIGURE_SKIP_EXPORT") == "1":
+        print("[figure] SCI_FIGURE_SKIP_EXPORT=1 — skipped drawio CLI export")
+        print(f"[figure] deliverable: {OUT}")
+        return 0
 
     # CLI export → review PNG (cleans up orphan drawio processes).
     # Math notation in `tex_cell()` (which uses \(...\) delimiters)

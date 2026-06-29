@@ -3,11 +3,11 @@ name: sci-figure
 description: Use when producing or revising a single publication-quality main figure for an AI/ML manuscript at NeurIPS / ICML / ICLR quality — typically the method / pipeline / architecture overview, but any single figure the user wants designed. Triggers on "make a figure", "method diagram", "pipeline figure", "main figure", "architecture diagram", "drawio figure for the paper". One invocation = one figure. If the user wants help with a secondary / auxiliary figure they will say so explicitly. Skip for slide decks, schematic sketches, or non-paper diagrams.
 license: MIT
 metadata:
-  short-description: Conference-quality main-figure workflow with drawio + matplotlib
-  version: 0.1.0
+  short-description: Semantic conference-figure workflow with drawio + matplotlib
+  version: 0.2.0
 ---
 
-# sci-figure — conference-quality main-figure workflow
+# sci-figure — semantic conference-figure workflow
 
 ## Goal
 
@@ -15,6 +15,10 @@ metadata:
 overview the user is currently designing — that explains the
 manuscript's *idea*, not its derivations, and is parseable in
 **5 seconds per panel**.
+
+The authoring interface is semantic: requirements, layout patterns,
+asset boundaries, wrappers, glyphs, and readouts. The `.drawio` XML is
+only the compiled editable target, not the design language.
 
 If the user invokes this skill they want **one** figure designed in
 this session. Don't try to plan or design secondary figures unless
@@ -26,6 +30,7 @@ One figure = one `<name>` triple:
 
 ```
 scripts/<name>/{generate_assets,generate_figure}.py + Makefile
+scripts/<name>/requirements.md
 assets/<name>/*.png
 artifacts/<name>.drawio + <name>_review.png
 ```
@@ -66,6 +71,7 @@ bash <SKILL>/scripts/new_figure.sh <name>
 # Iterate
 cd scripts/<name>
 make assets    # only when asset PNGs need re-rendering
+make xml       # build .drawio only; no drawio CLI export
 make figure    # only when drawio layout changes
 make all       # both, then writes <name>_review.png for agent review
 ```
@@ -75,10 +81,12 @@ make all       # both, then writes <name>_review.png for agent review
 
 ### Known drawio export failure
 
-If `make figure` or `make all` fails with drawio `SIGABRT` inside the
-Codex sandbox, rerun the same target with escalation / outside the
-sandbox. Do not treat this as `.drawio` corruption or rewrite the figure
-unless the escalated export also fails.
+If `make figure` or `make all` fails with drawio `SIGABRT`, empty
+output, or other Electron startup symptoms inside a sandbox, run
+`make xml` first. If the `.drawio` builds and `verify_aspect_ratios`
+passes, treat the issue as an export-environment problem, not figure
+corruption. Rerun export with escalation / outside the sandbox only
+when a PNG review file is required.
 
 ## Workflow (5 phases)
 
@@ -104,9 +112,12 @@ unless the escalated export also fails.
    in *Quality bar* below; everything else (panel count, arrangement,
    sub-panels, palette, page geometry, glyph repertoire, asset
    combinations) the human chooses.
-3. **Implement** — two independent scripts:
+3. **Implement** — two independent scripts plus a requirements log:
+   - `requirements.md` records palette semantics, arrow meanings,
+     asset vs drawio territory, and handoff notes.
    - `generate_assets.py` produces PNGs in `assets/<figure>/`.
-   - `generate_figure.py` reads those PNGs and produces the `.drawio`.
+   - `generate_figure.py` reads those PNGs and compiles semantic
+     layout helpers into the `.drawio`.
    They share no in-process state. Each can be re-run alone during
    audit / iteration.
 4. **Audit / Review** — open `artifacts/<figure>.drawio` in the drawio
@@ -215,17 +226,23 @@ Before showing a figure as done:
 
 Full checklist: `references/workflow.md`.
 
-## drawio-skill integration
+## drawio-skill backend adapter
 
-This skill **references** the drawio-skill bundle at
-`.agents/skills/drawio-skill/` for CLI invocation patterns and shape
-presets, but **never modifies it**. To pull upstream updates:
+This skill **references** the sibling drawio-skill bundle at
+`.agents/skills/drawio-skill/` as a backend knowledge adapter: CLI
+resolution, export flags, MathJax/export quirks, shape search,
+fallback URLs, and troubleshooting. Do not copy its general
+box-and-arrow workflow into scientific figure design.
+
+To refresh that backend adapter from upstream:
 
 ```bash
 bash <SKILL>/scripts/refresh_drawio_skill.sh
 ```
 
-That is the only legitimate way to change `drawio-skill/` contents.
+The default refresh updates the nested `skills/drawio-skill/SKILL.md`.
+Use `--bundle` to overlay the full upstream bundle without deleting
+local files.
 
 ## Anti-patterns
 

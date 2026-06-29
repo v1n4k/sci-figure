@@ -143,6 +143,16 @@ need data geometry it can't produce.
   (`apply_pub_rcparams()`); never lower per-helper.
 - Strip axis chrome (`ax.set_axis_off()`) when the asset is purely
   illustrative — labels live as drawio TeX cells, not baked in.
+- Avoid over-assetization. A PNG asset should contain the visual content
+  only: heatmap cells, sparse-grid dots, sample points, density fields,
+  or other data-like marks. Do not bake panel frames, titles, notation,
+  callout boxes, arrows, legends, or row / column labels into the PNG
+  unless they are literally part of the data. Drawio owns containers,
+  math labels, arrows, and annotations.
+- Crop transparent canvas tightly around the visible marks. Invisible
+  PNG whitespace should never determine drawio panel spacing. If a
+  panel looks empty because the asset has hidden padding, fix the asset
+  crop rather than stretching the panel.
 - Use perceptually-uniform colormaps (`viridis`, `cividis`, `magma`)
   — never `jet`, never `rainbow`.
 - Render once and inspect at 100 % zoom in Preview before embedding

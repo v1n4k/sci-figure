@@ -45,9 +45,9 @@ def _resolve_drawio_cli() -> Path:
     """Return the absolute path to the drawio CLI for this platform.
 
     Resolution order (in priority):
-    1. ``$DRAWIO_CLI`` env var if set and exists.
-    2. macOS app bundle: ``/Applications/draw.io.app/Contents/MacOS/draw.io``.
-    3. ``draw.io`` or ``drawio`` on PATH (Linux / Windows / brew).
+    1. ``$DRAWIO_CLI`` env var if set; may be a path or command name.
+    2. ``drawio`` or ``draw.io`` on PATH.
+    3. macOS app bundle: ``/Applications/draw.io.app/Contents/MacOS/draw.io``.
     """
     import os
 
@@ -56,16 +56,19 @@ def _resolve_drawio_cli() -> Path:
         p = Path(env).expanduser()
         if p.exists():
             return p
+        which = shutil.which(env)
+        if which:
+            return Path(which)
+
+    for name in ("drawio", "draw.io"):
+        which = shutil.which(name)
+        if which:
+            return Path(which)
 
     if platform.system() == "Darwin":
         mac = Path("/Applications/draw.io.app/Contents/MacOS/draw.io")
         if mac.exists():
             return mac
-
-    for name in ("draw.io", "drawio"):
-        which = shutil.which(name)
-        if which:
-            return Path(which)
 
     raise FileNotFoundError(
         "drawio CLI not found. Set $DRAWIO_CLI, install via "
