@@ -64,6 +64,7 @@ to the drawio file, not deliverables in their own right.
 ```bash
 # Once per project
 bash <SKILL>/scripts/bootstrap_env.sh
+# This also clones .agents/skills/drawio-skill/ if the backend bundle is missing.
 
 # Once per new figure (replace <name>)
 bash <SKILL>/scripts/new_figure.sh <name>
@@ -242,7 +243,8 @@ bash <SKILL>/scripts/refresh_drawio_skill.sh
 
 The default refresh updates the nested `skills/drawio-skill/SKILL.md`.
 Use `--bundle` to overlay the full upstream bundle without deleting
-local files.
+local files. During first deployment, `bootstrap_env.sh` clones the
+bundle automatically when `.agents/skills/drawio-skill/` is missing.
 
 ## Anti-patterns
 

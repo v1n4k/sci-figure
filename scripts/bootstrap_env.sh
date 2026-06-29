@@ -2,6 +2,9 @@
 # bootstrap_env.sh — set up a project's .venv with the sci-figure stack.
 #
 # Behaviour:
+# - Ensures the sibling ``.agents/skills/drawio-skill/`` backend bundle
+#   exists. If missing, clone it from upstream. Set
+#   ``SCI_FIGURE_REFRESH_DRAWIO=1`` to overlay-refresh an existing bundle.
 # - Ready-check first: if the existing .venv can already import every
 #   required package, print "ready" and exit 0. No reinstall, no churn.
 # - Otherwise: detect uv first (≈10× faster install); fall back to
@@ -25,10 +28,48 @@ SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 REQS="$SKILL_DIR/requirements.txt"
 LIB="$SKILL_DIR/lib"
 VENV="$PROJECT_ROOT/.venv"
+DRAWIO_REPO="https://github.com/Agents365-ai/drawio-skill.git"
+DRAWIO_DIR="$PROJECT_ROOT/.agents/skills/drawio-skill"
+DRAWIO_SKILL_MD="$DRAWIO_DIR/skills/drawio-skill/SKILL.md"
 
 cd "$PROJECT_ROOT"
 
-# ---------- 1. Ready-check ----------
+# ---------- 1. Backend adapter check ----------
+ensure_drawio_backend() {
+  if [[ -f "$DRAWIO_SKILL_MD" ]]; then
+    echo "[bootstrap] drawio-skill backend present at $DRAWIO_DIR"
+    if [[ "${SCI_FIGURE_REFRESH_DRAWIO:-0}" == "1" ]]; then
+      echo "[bootstrap] SCI_FIGURE_REFRESH_DRAWIO=1 — refreshing drawio backend"
+      bash "$SKILL_DIR/scripts/refresh_drawio_skill.sh" --bundle
+    fi
+    return 0
+  fi
+
+  if ! command -v git >/dev/null 2>&1; then
+    echo "[bootstrap] drawio-skill backend missing and git is not installed." >&2
+    echo "[bootstrap] install git or clone $DRAWIO_REPO into $DRAWIO_DIR manually." >&2
+    exit 1
+  fi
+
+  if [[ -e "$DRAWIO_DIR" ]]; then
+    echo "[bootstrap] drawio backend directory exists but nested SKILL.md is missing:" >&2
+    echo "            $DRAWIO_DIR" >&2
+    echo "[bootstrap] refusing to overwrite it; fix/remove the directory or run refresh manually." >&2
+    exit 1
+  fi
+
+  echo "[bootstrap] drawio-skill backend missing; cloning $DRAWIO_REPO"
+  mkdir -p "$(dirname "$DRAWIO_DIR")"
+  git clone --depth 1 "$DRAWIO_REPO" "$DRAWIO_DIR"
+  if [[ ! -f "$DRAWIO_SKILL_MD" ]]; then
+    echo "[bootstrap] clone completed but nested drawio SKILL.md was not found." >&2
+    exit 1
+  fi
+}
+
+ensure_drawio_backend
+
+# ---------- 2. Ready-check ----------
 # Cheap one-liner: if every required module imports, the env is good.
 ready_check() {
   [[ -x "$VENV/bin/python" ]] || return 1
@@ -51,7 +92,7 @@ fi
 
 echo "[bootstrap] environment not ready; installing…"
 
-# ---------- 2. Create venv if missing, install deps + lib ----------
+# ---------- 3. Create venv if missing, install deps + lib ----------
 if command -v uv >/dev/null 2>&1; then
   echo "[bootstrap] using uv"
   if [[ ! -d "$VENV" ]]; then

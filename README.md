@@ -37,16 +37,14 @@ install both skills and the Python environment, end to end:
 > 1. Create `.agents/skills/` if it doesn't exist.
 > 2. Clone `https://github.com/v1n4k/sci-figure.git` into
 >    `.agents/skills/sci-figure/`.
-> 3. Clone `https://github.com/Agents365-ai/drawio-skill.git` into
->    `.agents/skills/drawio-skill/` (sibling directory; the sci-figure
->    skill references it at exactly that path).
-> 4. Verify `drawio` is on `PATH` (`which drawio`) and `uv` is
+> 3. Verify `drawio` is on `PATH` (`which drawio`) and `uv` is
 >    installed (`which uv`); if either is missing, stop and tell me
 >    how to install it for my OS rather than guessing.
-> 5. Run `bash .agents/skills/sci-figure/scripts/bootstrap_env.sh`
->    from the project root — this creates `.venv/` and installs
+> 4. Run `bash .agents/skills/sci-figure/scripts/bootstrap_env.sh`
+>    from the project root — this clones the sibling `drawio-skill`
+>    backend if missing, creates `.venv/`, and installs
 >    `sci_figure_lib` plus the Tier 1 plotting stack.
-> 6. Confirm the install by importing `sci_figure_lib` inside `.venv`
+> 5. Confirm the install by importing `sci_figure_lib` inside `.venv`
 >    and printing its version.
 > Don't start a figure yet — wait until I describe the manuscript.
 
@@ -65,7 +63,8 @@ It must live at exactly:
 — a sibling of this skill's directory. The skill resolves its
 references through that path; do not move or rename it.
 
-To install the bundle:
+`bootstrap_env.sh` installs this bundle automatically when it is
+missing. To install it manually:
 
 ```bash
 git clone https://github.com/Agents365-ai/drawio-skill.git \
@@ -85,7 +84,13 @@ bash .agents/skills/sci-figure/scripts/refresh_drawio_skill.sh --bundle
 
 The script requires `.agents/skills/drawio-skill/` to already exist;
 it refuses to create it from scratch (so a typo can't silently
-overwrite something else).
+overwrite something else). To force-refresh an existing backend during
+bootstrap:
+
+```bash
+SCI_FIGURE_REFRESH_DRAWIO=1 \
+  bash .agents/skills/sci-figure/scripts/bootstrap_env.sh
+```
 
 ## Start a new figure
 
@@ -107,15 +112,19 @@ The skill is **explicitly human-in-the-loop** — the agent generates
 candidates and implements your choice; design taste belongs to you.
 
 ```
-   ┌──────────────────────── feedback / iterate ────────────────────────┐
-   │                                                                    │
-   ▼                                                                    │
- Read paper ──► Design (≥3 candidates) ──► Implement ──► Review ────────┤
-                          │                                             │
-                          ▼                                             │
-                       ╔══════╗                                         │
-                       ║ YOU  ║ ◄─ pick / hybridize / request reroll ◄──┘
-                       ╚══════╝
+   ┌────────────────────────────────── feedback / iterate ──────────────────────────────────┐
+   │                                                                                       │
+   ▼                                                                                       │
+ Read paper ──► requirements.md ──► layout candidates ──► YOU choose ──► asset PNGs         │
+       │              │                    │                          │                    │
+       │              │                    └─ exemplar / pattern refs  ▼                    │
+       │              └─ palette, arrows, asset/drawio boundary   semantic drawio compile   │
+       │                                                                  │                 │
+       │                                                                  ▼                 │
+       └────────────────────────────── review PNG / make xml ◄── editable .drawio ◄────────┘
+                                                                              │
+                                                                              ▼
+                                                                      human handoff
 ```
 
 - **Read paper** — agent extracts the single novelty, conceptual
@@ -124,13 +133,18 @@ candidates and implements your choice; design taste belongs to you.
   `references/layout.md`, each citing an exemplar with similar
   conceptual structure. **Agent does not pick the winner.**
 - **YOU** — pick one, ask for a hybrid, or ask for another round.
-- **Implement** — agent writes `generate_assets.py` (matplotlib PNGs)
-  and `generate_figure.py` (semantic drawio layout). Independent
-  scripts.
-- **Review** — bounded `<figure>_review.png` (≤ 1800 px) for the
-  5-second skim test, per panel and overall.
-- **Refine** — drawio cells tweak by hand or via the script; PNG
-  assets re-render only when the underlying data story changes.
+- **Log requirements** — `requirements.md` records palette semantics,
+  arrow meanings, asset/drawio boundary, and handoff state.
+- **Implement assets** — `generate_assets.py` renders tight PNG
+  thumbnails only for data-like visual content.
+- **Compile drawio** — `generate_figure.py` uses semantic helpers
+  (`Rect`, `panel_box`, `wrapper_box`, `block_arrow`, readout glyphs)
+  to produce the editable `.drawio`.
+- **Review** — `make xml` validates structure without drawio CLI;
+  `make figure` exports the bounded review PNG when the CLI is
+  available.
+- **Refine / handoff** — script-driven edits continue until final
+  human tuning starts; then record hand-tuned state before regenerating.
 
 ## Read more
 

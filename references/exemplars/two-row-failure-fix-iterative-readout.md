@@ -127,18 +127,18 @@ they can be edited and aligned after the layout is built.
                                  <short figure title>
 
 [A] <weak evidence amplifies a self-reinforcing failure loop>
-+----------------------+   +-------------------------------------------------------------+
-| context / sparse     | + | grouped failure mechanism                                  |
-| evidence thumbnail   |-->| panel 1 -> panel 2 -> panel 3                              |
-|                      |   |       ^ . . . . . . . . . . . . . . . . . . . . . . . . . |
-+----------------------+   +-------------------------------------------------------------+
++------------------------+      +------------------------------------------------------------------+
+| context / weak evidence|  +   | grouped failure mechanism                                       |
+| evidence thumbnail     |=====>| panel 1  ->  panel 2  ->  panel 3                               |
+|                        |      |    ^ . . . . . . . . . . . . . . . . . . . . . . . . . . .     |
++------------------------+      +------------------------------------------------------------------+
 
 [B] <method controls feedback and reads out only after convergence>
-+----------------------+   +-------------------------------------------------------------+  +------------------+
-| setup / partition    |-->| iterative core wrapper                                     |->| final readout    |
-| graph-like thumbnail |   | +-----------------------+  <=>  +-------------------------+ |  | converged dist.  |
-| aligned block rows   |   | | controlled inference  |       | parameter / state update | |  | uses:            |
-+----------------------+   | | local + global bars   |       | shared components        | |  | [decision]       |
-                           | +-----------------------+       +-------------------------+ |  | [soft target]    |
-                           +-------------------------------------------------------------+  +------------------+
++------------------------+      +------------------------------------------------------------------+      +--------------------+
+| setup / partition      |=====>| iterative core wrapper                                           |=====>| final readout      |
+| graph-like thumbnail   |      | +--------------------------+   <=>   +--------------------------+ |      | converged dist.    |
+| aligned block rows     |      | | controlled inference     |         | parameter / state update | |      | uses:              |
+|                        |      | | local + global bars      |         | shared components        | |      | [decision]         |
++------------------------+      | +--------------------------+         +--------------------------+ |      | [soft target]      |
+                                +------------------------------------------------------------------+      +--------------------+
 ```
