@@ -10,6 +10,11 @@ Every glyph takes either:
   needle position), and / or
 - explicit colours (no project palette baked in).
 
+Semantic helpers such as ``distribution_bar_strip`` and ``readout_list``
+are intentionally label-light. The per-figure script and requirements
+log own whether a bar strip is evidence, an iterative posterior, or a
+converged readout.
+
 The labels α / β on ``gauge_glyph`` are conventional Greek for the
 "two endpoints of a mixing dial" idiom — they are not project-specific.
 Override via ``alpha_label`` / ``beta_label`` if you prefer different
@@ -35,6 +40,187 @@ class GlyphMixin:
         class MyBuilder(DrawioBuilder, GlyphMixin):
             ...
     """
+
+    def distribution_bar_strip(
+        self,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        labels: list[str],
+        values: list[float],
+        *,
+        title: str | None = None,
+        color: str = "#2563EB",
+        track_color: str = _NEUTRAL_TRACK,
+        fill: str = "#FFFFFF",
+        stroke: str = _NEUTRAL_FRAME,
+        prefix: str = "dist",
+    ) -> str:
+        """Compact horizontal bar distribution for evidence/posterior/readout.
+
+        The caller's surrounding label must state the semantic level
+        (evidence, iterative posterior, converged readout, etc.). This
+        glyph only draws the reusable visual grammar.
+        """
+
+        if len(labels) != len(values):
+            raise ValueError("labels and values must have the same length")
+        if not labels:
+            raise ValueError("at least one distribution row is required")
+
+        bg = self.cell(
+            "",
+            x,
+            y,
+            w,
+            h,
+            f"rounded=1;arcSize=8;whiteSpace=wrap;html=1;"
+            f"fillColor={fill};strokeColor={stroke};strokeWidth=1.1;",
+            prefix=f"{prefix}_bg",
+        )
+        font = getattr(self, "font", "Helvetica")
+        top_pad = 8
+        if title:
+            self.cell(
+                title,
+                x + 12,
+                y + 6,
+                w - 24,
+                24,
+                "text;html=1;strokeColor=none;fillColor=none;whiteSpace=wrap;"
+                f"fontFamily={font};fontSize=18;fontColor={color};fontStyle=1;"
+                "align=left;verticalAlign=middle;",
+                prefix=f"{prefix}_title",
+            )
+            top_pad = 34
+        pad_x = 12
+        label_w = min(54, max(30, w * 0.16))
+        row_gap = 6
+        row_h = max(9, (h - top_pad - 8 - row_gap * (len(labels) - 1)) / len(labels))
+        track_x = x + pad_x + label_w
+        track_w = max(10, w - 2 * pad_x - label_w)
+        for idx, (label, value) in enumerate(zip(labels, values)):
+            yy = y + top_pad + idx * (row_h + row_gap)
+            self.cell(
+                label,
+                x + pad_x,
+                yy - 1,
+                label_w - 6,
+                row_h + 2,
+                "text;html=1;strokeColor=none;fillColor=none;whiteSpace=wrap;"
+                f"fontFamily={font};fontSize=16;fontColor=#64748B;fontStyle=1;"
+                "align=left;verticalAlign=middle;",
+                prefix=f"{prefix}_lab{idx}",
+            )
+            self.cell(
+                "",
+                track_x,
+                yy,
+                track_w,
+                row_h,
+                f"rounded=0;fillColor={track_color};strokeColor=none;",
+                prefix=f"{prefix}_track{idx}",
+            )
+            frac = max(0.0, min(1.0, float(value)))
+            self.cell(
+                "",
+                track_x,
+                yy,
+                max(2.0, track_w * frac),
+                row_h,
+                f"rounded=0;fillColor={color};strokeColor=none;",
+                prefix=f"{prefix}_bar{idx}",
+            )
+        return bg
+
+    def readout_list(
+        self,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        header: str,
+        items: list[str],
+        *,
+        color: str = "#7E22CE",
+        fill: str = "#F5F3FF",
+        prefix: str = "readout",
+    ) -> str:
+        """Final readout panel: one source with a clean list of uses."""
+
+        if not items:
+            raise ValueError("readout_list requires at least one item")
+        bg = self.cell(
+            "",
+            x,
+            y,
+            w,
+            h,
+            f"rounded=1;arcSize=8;whiteSpace=wrap;html=1;"
+            f"fillColor={fill};strokeColor={color};strokeWidth=1.5;",
+            prefix=f"{prefix}_bg",
+        )
+        font = getattr(self, "font", "Helvetica")
+        self.cell(
+            header,
+            x + 14,
+            y + 10,
+            w - 28,
+            28,
+            "text;html=1;strokeColor=none;fillColor=none;whiteSpace=wrap;"
+            f"fontFamily={font};fontSize=20;fontColor={color};fontStyle=1;"
+            "align=left;verticalAlign=middle;",
+            prefix=f"{prefix}_header",
+        )
+        chip_h = max(28, min(42, (h - 54) / len(items) - 4))
+        for idx, item in enumerate(items):
+            yy = y + 48 + idx * (chip_h + 8)
+            self.cell(
+                item,
+                x + 18,
+                yy,
+                w - 36,
+                chip_h,
+                "rounded=1;arcSize=8;whiteSpace=wrap;html=1;"
+                f"fillColor=#FFFFFF;strokeColor={color};strokeWidth=1.2;"
+                f"fontFamily={font};fontSize=18;fontColor={color};fontStyle=1;"
+                "align=center;verticalAlign=middle;",
+                prefix=f"{prefix}_item{idx}",
+            )
+        return bg
+
+    def stacked_backplates(
+        self,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        *,
+        count: int = 3,
+        offset: float = 8,
+        fill: str = "#FFFFFF",
+        stroke: str = "#93C5FD",
+        prefix: str = "stack",
+    ) -> str:
+        """Draw backplates for genuinely multi-instance block-local objects."""
+
+        if count < 1:
+            raise ValueError("count must be at least 1")
+        last = ""
+        for idx in reversed(range(count)):
+            op = 100 - idx * 18
+            last = self.cell(
+                "",
+                x + idx * offset,
+                y - idx * offset,
+                w,
+                h,
+                f"rounded=1;arcSize=8;whiteSpace=wrap;html=1;"
+                f"fillColor={fill};strokeColor={stroke};strokeWidth=1.2;opacity={max(35, op)};",
+                prefix=f"{prefix}_{idx}",
+            )
+        return last
 
     def reliability_pill(
         self,

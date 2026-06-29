@@ -1,6 +1,6 @@
 # sci-figure
 
-Conference-quality main-figure workflow for AI/ML manuscripts.
+Semantic conference-quality main-figure workflow for AI/ML manuscripts.
 
 One invocation produces **one figure** — typically the main method /
 pipeline / concept overview the user is currently designing. The
@@ -13,7 +13,9 @@ independent matplotlib script and embedded.
 > you a strong starting point — a coherent layout, a calibrated
 > palette, asset stubs, a working `.drawio` source — that you finish
 > by hand in the drawio app. Treat the output as a draft to refine,
-> not a deliverable to ship.
+> not a deliverable to ship. The Python layer is a semantic layout
+> compiler; drawio XML is the editable target, not the authoring
+> surface.
 
 ## Prerequisites
 
@@ -43,16 +45,17 @@ install both skills and the Python environment, end to end:
 >    how to install it for my OS rather than guessing.
 > 5. Run `bash .agents/skills/sci-figure/scripts/bootstrap_env.sh`
 >    from the project root — this creates `.venv/` and installs
->    `sci_figure_lib` editable plus the Tier 1 plotting stack.
+>    `sci_figure_lib` plus the Tier 1 plotting stack.
 > 6. Confirm the install by importing `sci_figure_lib` inside `.venv`
 >    and printing its version.
 > Don't start a figure yet — wait until I describe the manuscript.
 
-## Companion bundle: drawio-skill
+## Companion bundle: drawio-skill backend
 
 This skill **references** but does not vendor the upstream
 [drawio-skill](https://github.com/Agents365-ai/drawio-skill) bundle
-(CLI invocation patterns, shape presets, MathJax delimiter rules).
+(CLI invocation patterns, export pitfalls, shape search, MathJax
+delimiter rules, fallback URLs).
 It must live at exactly:
 
 ```
@@ -73,10 +76,10 @@ To later refresh upstream changes, the skill ships
 `scripts/refresh_drawio_skill.sh`:
 
 ```bash
-# Just the SKILL.md (default — most-likely-to-change file)
+# Just the nested SKILL.md (default — most-likely-to-change file)
 bash .agents/skills/sci-figure/scripts/refresh_drawio_skill.sh
 
-# Whole bundle (re-clone + rsync, excluding .git)
+# Whole bundle (re-clone + overlay rsync, excluding .git; no delete)
 bash .agents/skills/sci-figure/scripts/refresh_drawio_skill.sh --bundle
 ```
 
@@ -89,11 +92,14 @@ overwrite something else).
 ```bash
 bash .agents/skills/sci-figure/scripts/new_figure.sh <name>
 cd scripts/<name>
-make all
+make assets
+make xml     # build .drawio only, no drawio CLI export
+make figure  # export review PNG when drawio CLI is available
 ```
 
-Two stubs — `generate_assets.py` and `generate_figure.py` — land in
-`scripts/<name>/`. Edit those. The lib stays in the skill.
+Two stubs — `generate_assets.py` and `generate_figure.py` — plus a
+`requirements.md` decision log land in `scripts/<name>/`. Edit those.
+The lib stays in the skill.
 
 ## Workflow
 
@@ -119,7 +125,8 @@ candidates and implements your choice; design taste belongs to you.
   conceptual structure. **Agent does not pick the winner.**
 - **YOU** — pick one, ask for a hybrid, or ask for another round.
 - **Implement** — agent writes `generate_assets.py` (matplotlib PNGs)
-  and `generate_figure.py` (drawio layout). Independent scripts.
+  and `generate_figure.py` (semantic drawio layout). Independent
+  scripts.
 - **Review** — bounded `<figure>_review.png` (≤ 1800 px) for the
   5-second skim test, per panel and overall.
 - **Refine** — drawio cells tweak by hand or via the script; PNG

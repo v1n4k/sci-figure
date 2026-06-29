@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# refresh_drawio_skill.sh — pull the latest drawio-skill SKILL.md from upstream.
+# refresh_drawio_skill.sh — pull the latest drawio-skill backend adapter.
 #
 # Upstream: https://github.com/Agents365-ai/drawio-skill
-# Default behaviour: refresh only SKILL.md (the most likely-to-change file).
-# Pass --bundle to re-download the entire skill via git clone.
+# Default behaviour: refresh only the nested skills/drawio-skill/SKILL.md.
+# Pass --bundle to overlay the entire repository without deleting local files.
 #
 # Usage:
 #   bash .agents/skills/sci-figure/scripts/refresh_drawio_skill.sh [--bundle]
@@ -12,6 +12,7 @@ set -euo pipefail
 
 REPO="Agents365-ai/drawio-skill"
 TARGET_DIR=".agents/skills/drawio-skill"
+NESTED_SKILL="skills/drawio-skill/SKILL.md"
 RAW_BASE="https://raw.githubusercontent.com/$REPO/main"
 
 if [[ ! -d "$TARGET_DIR" ]]; then
@@ -25,20 +26,24 @@ if [[ "$mode" == "--bundle" ]]; then
   echo "[refresh] cloning entire bundle from $REPO into a temp dir"
   TMP="$(mktemp -d)"
   git clone --depth 1 "https://github.com/$REPO.git" "$TMP/drawio-skill"
-  echo "[refresh] sync new files into $TARGET_DIR (excluding .git)"
-  rsync -a --delete --exclude=.git "$TMP/drawio-skill/" "$TARGET_DIR/"
+  COMMIT="$(git -C "$TMP/drawio-skill" rev-parse --short HEAD)"
+  echo "[refresh] overlay new files into $TARGET_DIR (excluding .git; no delete)"
+  rsync -a --exclude=.git "$TMP/drawio-skill/" "$TARGET_DIR/"
   rm -rf "$TMP"
+  echo "[refresh] upstream commit $COMMIT"
 else
-  echo "[refresh] fetching latest SKILL.md only"
-  curl -fsSL "$RAW_BASE/SKILL.md" -o "$TARGET_DIR/SKILL.md.new"
-  if diff -q "$TARGET_DIR/SKILL.md.new" "$TARGET_DIR/SKILL.md" >/dev/null 2>&1; then
+  echo "[refresh] fetching latest nested $NESTED_SKILL only"
+  mkdir -p "$(dirname "$TARGET_DIR/$NESTED_SKILL")"
+  curl -fsSL "$RAW_BASE/$NESTED_SKILL" -o "$TARGET_DIR/$NESTED_SKILL.new"
+  if diff -q "$TARGET_DIR/$NESTED_SKILL.new" "$TARGET_DIR/$NESTED_SKILL" >/dev/null 2>&1; then
     echo "[refresh] SKILL.md already up to date"
-    rm "$TARGET_DIR/SKILL.md.new"
+    rm "$TARGET_DIR/$NESTED_SKILL.new"
   else
-    mv "$TARGET_DIR/SKILL.md.new" "$TARGET_DIR/SKILL.md"
+    mv "$TARGET_DIR/$NESTED_SKILL.new" "$TARGET_DIR/$NESTED_SKILL"
     echo "[refresh] SKILL.md updated"
   fi
 fi
 
 # Show the version stamp from the YAML metadata for confirmation.
-grep -oE '"version":"[^"]+"' "$TARGET_DIR/SKILL.md" | head -1 || true
+grep -E '^version:' "$TARGET_DIR/$NESTED_SKILL" | head -1 || true
+grep -oE '"version":"[^"]+"' "$TARGET_DIR/$NESTED_SKILL" | head -1 || true

@@ -74,6 +74,25 @@ each other, wrap them as an iterative core or draw a clear return path.
 Keep the final prediction / readout panel outside that core when it is
 only valid after convergence.
 
+## Prefer semantic grouping over connector hairballs
+
+Do not make every relation an explicit routed arrow. In dense scientific
+figures, connector complexity often harms the claim.
+
+Use these higher-level encodings first:
+- `wrapper_box` for iterative cores, grouped failure loops, and shared
+  mechanism regions;
+- `block_arrow` for high-level separation, propagation, or readout when
+  a thin connector would over-specify causality;
+- `readout_list` for final uses such as prediction, label, or soft
+  target, instead of several internal output arrows;
+- colour-coded panels or side labels when the relation is membership,
+  not data flow.
+
+Use routed connectors only when the paper genuinely needs point-to-point
+flow. If a connector needs more than two waypoints to avoid unrelated
+objects, first try a wrapper, a block arrow, or a layout change.
+
 ## Square thumbnails
 
 Class-identifier thumbnails, when used, must be square. The

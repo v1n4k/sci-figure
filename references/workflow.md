@@ -17,6 +17,10 @@ Before drawing anything:
   sklearn / scipy / seaborn can produce honestly) vs **drawio
   territory** (boxes, arrows, glyphs, captions, math notation, the
   reading order between elements).
+- Start `scripts/<figure>/requirements.md` as soon as the figure name
+  exists. Treat it as the decision log for palette semantics, arrow
+  meanings, asset/drawio territory, stacked quantities, final readout
+  semantics, and handoff status.
 
 ## Phase 2 — Design (explore, then human selects)
 
@@ -97,6 +101,9 @@ Lock in:
   what each arrow means, which quantities are evidence vs posterior vs
   final readout, what should be stacked, and which glyphs are assets
   rather than drawio containers.
+- whether the method should be shown as a one-pass pipeline, an
+  iterative core, or a converged final readout. Do not leave this for
+  implementation to infer from arrows.
 
 Move to Phase 3 (implement).
 
@@ -127,8 +134,12 @@ Two scripts, both in `scripts/<figure>/`, both standalone:
 - **No matplotlib import.**
 - Reads PNGs from `assets/<figure>/`; if none exist, exits with a
   message telling the user to run `generate_assets.py` first.
-- Builds the `.drawio`, runs `verify_aspect_ratios`, exports a
-  full-resolution CLI PNG, downsamples to a bounded review PNG.
+- Uses semantic layout helpers (`Rect`, `panel_box`, `wrapper_box`,
+  `block_arrow`, distribution/readout glyphs) so the script reads like
+  a figure plan rather than raw XML coordinates.
+- Builds the `.drawio`, runs `verify_aspect_ratios`, then either:
+  `SCI_FIGURE_SKIP_EXPORT=1 make xml` for structure-only validation, or
+  `make figure` for CLI export + bounded review PNG.
 
 The two scripts share no in-process state. Re-running either alone
 exercises one stage of the pipeline.
@@ -186,8 +197,14 @@ full-resolution `<figure>.drawio.png` is for human inspection at 100 %.
 ## Phase 5 — Refine
 
 - **drawio cells = tweakable post-hoc** — move, recolour, resize by
-  hand in the drawio app, or by re-running `generate_figure.py` (the
-  fast path).
+  hand in the drawio app, or by re-running `generate_figure.py` before
+  final handoff.
+- **Handoff boundary is explicit** — once the user starts hand-tuning
+  the `.drawio`, record that state in `requirements.md`. Do not blindly
+  regenerate and overwrite hand-tuned arrows, spacing, or labels. If a
+  scripted change is still needed, fold the human edits back into
+  `generate_figure.py` first or clearly agree that the hand-tuned state
+  will be replaced.
 - **PNG assets = locked images** — they cannot be edited after the
   fact. Therefore every asset must hit publication quality on the
   first render: cluster ellipsoids, white-haloed prototype markers,
@@ -202,6 +219,7 @@ full-resolution `<figure>.drawio.png` is for human inspection at 100 %.
 Run before showing a figure as "done":
 
 - `verify_aspect_ratios(<drawio>)` exits 0
+- `make xml` succeeds before any slower CLI export attempt
 - Equation count in the figure body matches budget (default 0)
 - No HTML `<sub>` / `<sup>` leaked into a Path-A figure (grep the
   `.drawio` source — those should be `$..._x$` instead)
