@@ -92,6 +92,11 @@ Lock in:
 - notation rendering: `tex_cell()` (drawio MathJax — default; renders
   in both app view and CLI PNG export) or `math_cell()` (HTML +
   Unicode escape hatch). See `notation.md` for delimiter rules.
+- a short per-figure requirements checklist. This should capture
+  decisions that are easy to lose during refinement: palette semantics,
+  what each arrow means, which quantities are evidence vs posterior vs
+  final readout, what should be stacked, and which glyphs are assets
+  rather than drawio containers.
 
 Move to Phase 3 (implement).
 
@@ -160,6 +165,19 @@ Common regressions to look for:
   was reserved.
 - **Asset chrome** — axis ticks / titles baked into a PNG when a
   drawio TeX cell would be cleaner.
+
+Semantic regressions to look for during later refinement:
+- **Palette drift** — a colour starts meaning two unrelated concepts,
+  or one concept is split across unrelated colours.
+- **Arrow drift** — a convenience arrow implies causality, one-pass
+  production, or availability before convergence.
+- **Stacking drift** — stacked-card effects are applied to quantities
+  that are not actually multi-instance.
+- **Distribution drift** — evidence summaries, iterative posteriors,
+  and final readouts are drawn with similar bars but not labelled at
+  their correct semantic level.
+- **Over-assetization** — PNG assets contain frames, titles, notation,
+  or callouts that should remain editable drawio cells.
 
 For agent review, use the **bounded review PNG**
 (`<figure>_review.png`, ≤ 1500 px) — see `review-render.md`. The
