@@ -112,19 +112,13 @@ The skill is **explicitly human-in-the-loop** — the agent generates
 candidates and implements your choice; design taste belongs to you.
 
 ```
-   ┌────────────────────────────────── feedback / iterate ──────────────────────────────────┐
-   │                                                                                       │
-   ▼                                                                                       │
- Read paper ──► requirements.md ──► layout candidates ──► YOU choose ──► asset PNGs         │
-       │              │                    │                          │                    │
-       │              │                    └─ exemplar / pattern refs  ▼                    │
-       │              └─ palette, arrows, asset/drawio boundary   semantic drawio compile   │
-       │                                                                  │                 │
-       │                                                                  ▼                 │
-       └────────────────────────────── review PNG / make xml ◄── editable .drawio ◄────────┘
-                                                                              │
-                                                                              ▼
-                                                                      human handoff
++------------------+    +------------------+    +------------------+    +------------------+
+| 1 read paper     |--->| 2 requirements   |--->| 3 layout choices |--->| 4 user chooses   |
++------------------+    +------------------+    +------------------+    +------------------+
+
++------------------+    +------------------+    +------------------+    +------------------+
+| 5 assets+compile |--->| 6 drawio draft   |--->| 7 review / xml   |--->| 8 handoff/refine |
++------------------+    +------------------+    +------------------+    +------------------+
 ```
 
 - **Read paper** — agent extracts the single novelty, conceptual

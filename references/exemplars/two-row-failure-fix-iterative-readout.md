@@ -124,21 +124,21 @@ they can be edited and aligned after the layout is built.
 ## ASCII layout sketch
 
 ```
-                                 <short figure title>
+<short figure title>
 
-[A] <weak evidence amplifies a self-reinforcing failure loop>
-+------------------------+      +------------------------------------------------------------------+
-| context / weak evidence|  +   | grouped failure mechanism                                       |
-| evidence thumbnail     |=====>| panel 1  ->  panel 2  ->  panel 3                               |
-|                        |      |    ^ . . . . . . . . . . . . . . . . . . . . . . . . . . .     |
-+------------------------+      +------------------------------------------------------------------+
+[A] Weak evidence amplifies a self-reinforcing failure loop
++----------------------+    +----------------------------------------------+
+| weak-evidence        | => | grouped failure mechanism                    |
+| context thumbnail    |    | [panel 1] -> [panel 2] -> [panel 3]          |
+| not a causal source  |    | ^ . . . dashed feedback hint . . .           |
++----------------------+    +----------------------------------------------+
 
-[B] <method controls feedback and reads out only after convergence>
-+------------------------+      +------------------------------------------------------------------+      +--------------------+
-| setup / partition      |=====>| iterative core wrapper                                           |=====>| final readout      |
-| graph-like thumbnail   |      | +--------------------------+   <=>   +--------------------------+ |      | converged dist.    |
-| aligned block rows     |      | | controlled inference     |         | parameter / state update | |      | uses:              |
-|                        |      | | local + global bars      |         | shared components        | |      | [decision]         |
-+------------------------+      | +--------------------------+         +--------------------------+ |      | [soft target]      |
-                                +------------------------------------------------------------------+      +--------------------+
+[B] Method controls feedback and reads out after convergence
++----------------------+    +----------------------------------------------+    +--------------------+
+| setup / partition    | => | iterative core wrapper                       | => | final readout      |
+| graph thumbnail      |    | +------------------+ <=> +-----------------+ |    | converged dist.    |
+| aligned block rows   |    | | controlled inf.  |     | state update    | |    | uses:              |
+|                      |    | | local/global bars|     | shared comps.   | |    | [decision]         |
+|                      |    | +------------------+     +-----------------+ |    | [soft target]      |
++----------------------+    +----------------------------------------------+    +--------------------+
 ```
