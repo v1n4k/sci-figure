@@ -5,7 +5,7 @@ combination. Anything not listed here (panel arrangement, sub-panels,
 palette concepts, glyph types, page geometry, library combinations)
 is a design choice you derive from the paper.
 
-## 1. No derivation walls in the figure body
+## 1. Math supports the picture, not the reverse
 
 The forbidden pattern is a multi-line derivation chain, a manipulated
 identity, or any equation block that the reader has to *parse* rather
@@ -15,18 +15,15 @@ What's allowed: **one-line definitions** of symbols the figure
 introduces. A definition like `z = f(w)` placed next to where `z`
 first appears, or a target like `v* = Δq/Δt` placed next to the
 construct it defines — these *replace* what would otherwise be
-verbose verbal labels and earn their place in the figure. The
-exemplar `exemplars/two-row-training-inference.md` uses around six
-such definitions and reads cleanly because none is a derivation.
+verbose verbal labels and earn their place in the figure.
 
-Practical limits:
+Practical guidance:
 
 - Each equation is one line, defines exactly one new symbol the
   figure introduces, and sits adjacent to where that symbol first
   appears.
-- Across the whole figure, ≤ 6 such definitions. If you're tempted
-  past that, you're probably trying to land too much in one figure
-  (see `anti-patterns.md` figure-bloat).
+- Keep definitions rare. If the figure starts to look like a notation
+  sheet, replace math with visual encoding or move detail to the paper.
 - **Zero derivation chains.** `a → b → c → d` developed across cells
   belongs in the paper text, never in the figure.
 - **Zero manipulated identities.** No "= reduces to ... = simplifies
@@ -36,10 +33,10 @@ Practical limits:
   don't count toward the limit.
 
 Why: a main figure is a poster, not a derivation. The 5-second skim
-test fails immediately when the eye has to parse a chained formula.
-A *single line* defining a symbol is recognisable in under a second
-and adds explanatory power; a *block* of math forces real reading and
-loses the skim.
+test fails when the eye has to parse a chained formula. A *single
+line* defining a symbol can be recognised quickly and add explanatory
+power; a *block* of math forces real reading and steals attention from
+the visual story.
 
 ## 2. No specific numeric values
 

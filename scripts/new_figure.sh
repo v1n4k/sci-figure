@@ -2,10 +2,9 @@
 # new_figure.sh — scaffold a new figure project layout.
 #
 # Copies only the per-figure stubs (generate_assets.py, generate_figure.py,
-# Makefile, requirements.md) into scripts/<name>/. The DrawioBuilder, glyphs, render
-# helpers, and matplotlib styling primitives stay in the skill's lib/
-# and are imported via the editable install — no copy-and-customise of
-# the lib here.
+# Makefile, requirements.md) into scripts/<name>/. The DrawioBuilder,
+# glyphs, render helpers, and matplotlib styling primitives stay in the
+# skill's installed lib — no copy-and-customise of the lib here.
 #
 # Usage:
 #   bash .agents/skills/sci-figure/scripts/new_figure.sh <figure_name>

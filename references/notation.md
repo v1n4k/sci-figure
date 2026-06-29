@@ -1,13 +1,13 @@
 # Notation Policy
 
-The skill renders math via drawio's built-in MathJax. Both the
-drawio app and the CLI PNG / PDF export rasterize the math
-correctly — there is no "open in app vs view in CLI" trade-off.
+The skill renders math via drawio's built-in MathJax. In practice,
+math can render correctly in both the drawio app and the CLI PNG / PDF
+export when cells use delimiters that drawio's MathJax accepts.
 
-## Delimiters drawio actually accepts
+## Prefer helpers over hand-written delimiters
 
-This is the single most important thing to get right. Drawio's
-MathJax is configured with non-standard delimiters:
+`tex_cell()` is the default path because it wraps raw LaTeX with the
+delimiters this skill tests in drawio exports:
 
 | Form | Delimiter | Use |
 |---|---|---|
@@ -15,13 +15,12 @@ MathJax is configured with non-standard delimiters:
 | Display LaTeX | `$$...$$` | larger, centred display equation |
 | AsciiMath | `` `...` `` | shorter syntax for simple expressions |
 
-**Drawio does NOT accept the single-dollar `$...$` form.** Cells
-containing `$\mu_{\ell,c}$` render as the literal string
-`$\mu_{\ell,c}$` in both the app view and any CLI export. This is
-a common gotcha because most other MathJax setups (Jupyter, MkDocs,
-Pandoc) accept `$...$` by default.
+Bare `$...$` delimiters are less portable across drawio / export
+configurations. If a hand-written cell uses them, verify the review PNG
+before relying on it. If the delimiters render literally, switch that
+cell to `tex_cell()` or `\(...\)`.
 
-## Use the helpers — they wrap correctly
+## Use the helpers — they wrap consistently
 
 ```python
 from sci_figure_lib.drawio_builder import DrawioBuilder
@@ -75,13 +74,13 @@ require splitting the cell.
 
 ## Audit before shipping
 
-Before declaring a figure done, grep the produced `.drawio` source
-for the broken-delimiter pattern:
+Before declaring a figure done, inspect the review PNG and optionally
+grep the produced `.drawio` source for hand-written `$...$` cells:
 
 ```bash
 grep -oE '\$[^$]+\$' artifacts/<figure>.drawio | head
 ```
 
-Any non-empty output is a bug — those cells will render as literal
-text. Fix by switching to `\(...\)` (or by removing the `$...$` if
-the content was meant to be plain text).
+Non-empty output is not automatically a bug, but every match should be
+visually checked. When in doubt, prefer `tex_cell()` so the generated
+cell uses the skill's tested delimiters.

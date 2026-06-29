@@ -83,9 +83,9 @@ never a manipulated identity. The equations *replace* what would
 otherwise be verbose verbal labels. Each equation sits next to where
 the symbol first appears.
 
-This is more permissive than the default "0 equations" rule and the
-figure is better for it. The rule should be: *no derivation walls;
-one-line definitions of newly introduced notation are fine*.
+The rule is qualitative rather than a fixed quota: *no derivation
+walls; one-line definitions of newly introduced notation are fine when
+they help the visual story land faster than a prose label would*.
 
 ### In-panel italic asides instead of mechanics boxes
 
@@ -128,9 +128,8 @@ modelling papers, most rollout / sampling papers, many RL papers):
 
 For **any paper introducing new notation**:
 
-- **One-line displayed equations** anchored where each symbol first
-  appears. Cap around 6 across the whole figure; never a derivation
-  chain.
+- **One-line displayed definitions** anchored where each symbol first
+  appears. Keep them sparse; never use a derivation chain.
 - **Italic in-panel asides** in the relevant semantic colour to
   orient the eye, replacing mechanics-naming boxes.
 

@@ -1,10 +1,6 @@
 ---
 name: sci-figure
 description: Use when producing or revising a single publication-quality main figure for an AI/ML manuscript at NeurIPS / ICML / ICLR quality — typically the method / pipeline / architecture overview, but any single figure the user wants designed. Triggers on "make a figure", "method diagram", "pipeline figure", "main figure", "architecture diagram", "drawio figure for the paper". One invocation = one figure. If the user wants help with a secondary / auxiliary figure they will say so explicitly. Skip for slide decks, schematic sketches, or non-paper diagrams.
-license: MIT
-metadata:
-  short-description: Semantic conference-figure workflow with drawio + matplotlib
-  version: 0.2.0
 ---
 
 # sci-figure — semantic conference-figure workflow
@@ -135,9 +131,10 @@ asset combination. Anything *not* listed here (panel count,
 arrangement, sub-panels, palette concepts, glyph types, page geometry,
 library combinations) is a design choice you make from the paper.
 
-- **Zero displayed equation cells in body.** Single-symbol notation
-  labels on arrows / glyphs / captions are fine; full equations belong
-  in the paper text.
+- **Math stays subordinate to the picture.** Single-symbol labels and
+  short one-line definitions are fine when they reduce text or anchor
+  a visual element. Avoid derivation blocks, equation chains, and math
+  whose main job is to be read rather than recognised.
 - **Zero specific numeric values** anywhere. Bar height, line
   thickness, fill saturation, glyph length carry magnitude.
 - **Zero derivation chains.** Collapse 3 + chained intermediates into
@@ -176,11 +173,12 @@ within those constraints is open.
 
 ## Notation
 
-Math renders via drawio's built-in MathJax in **both** the app view
-and the CLI PNG / PDF export. The single gotcha: drawio's MathJax
-uses non-standard delimiters — `\(...\)` for inline, `$$...$$` for
-display. The `$...$` form most other MathJax setups accept does
-**not** work in drawio.
+Math can render via drawio's built-in MathJax in **both** the app view
+and the CLI PNG / PDF export. Use `tex_cell()` whenever possible: it
+wraps raw LaTeX with delimiters that have worked reliably in drawio
+exports. If you hand-write math inside HTML cells, prefer `\(...\)`
+for inline math or `$$...$$` for display math, then verify the review
+PNG rather than assuming every MathJax delimiter behaves the same.
 
 Use `tex_cell()` in `sci_figure_lib`; it wraps with the right
 delimiter automatically. For HTML + Unicode (no MathJax dependency)
@@ -207,11 +205,12 @@ The only **firm** layout rules:
 Before showing a figure as done:
 
 - `verify_aspect_ratios()` exits 0
-- Equation count matches budget (default 0)
-- **No bare `$...$` in the produced `.drawio`** — those are broken
-  delimiters and render as literal text. Grep:
-  `grep -oE '\$[^$]+\$' artifacts/<figure>.drawio` should return
-  nothing. See `references/notation.md`.
+- Math use is visually justified: no derivation chains, no equation
+  walls, and any one-line definition sits next to the visual element it
+  names.
+- Rendered math was checked in the review PNG. If bare `$...$` appears
+  in the produced `.drawio`, inspect the PNG and switch to `tex_cell()`
+  or `\(...\)` if it renders literally. See `references/notation.md`.
 - Every header / label measures ≥ 1.5 % of `min(canvas_dim)` after
   final scaling
 - Forward 5-second skim per panel passes

@@ -49,8 +49,10 @@ class DrawioBuilder:
         Page dimensions in pixels.
     math:
         If True (default), set ``math="1"`` on ``mxGraphModel`` so drawio's
-        MathJax renders ``$...$`` content in cells. Set False if you need
-        every export path (CLI PNG / PDF / SVG) to display the raw text.
+        MathJax can render math cells. Prefer ``tex_cell()`` for LaTeX
+        because it wraps raw TeX with delimiters that are checked by this
+        workflow. Set False only if you need every export path to display
+        the raw text.
     diagram_name:
         Cosmetic name written into the ``diagram`` element.
     """

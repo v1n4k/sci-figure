@@ -92,7 +92,8 @@ The agent does **not** push back on the choice; it implements.
 
 Lock in:
 - the rough sub-element bounding boxes (with arrow corridors);
-- the equation budget (default = 0 displayed equations);
+- the notation plan: which symbols must appear, whether each needs a
+  one-line definition, and which equations should stay in the paper;
 - notation rendering: `tex_cell()` (drawio MathJax — default; renders
   in both app view and CLI PNG export) or `math_cell()` (HTML +
   Unicode escape hatch). See `notation.md` for delimiter rules.
@@ -220,9 +221,12 @@ Run before showing a figure as "done":
 
 - `verify_aspect_ratios(<drawio>)` exits 0
 - `make xml` succeeds before any slower CLI export attempt
-- Equation count in the figure body matches budget (default 0)
-- No HTML `<sub>` / `<sup>` leaked into a Path-A figure (grep the
-  `.drawio` source — those should be `$..._x$` instead)
+- Math remains visually subordinate: no derivation chains, no equation
+  walls, and every one-line definition is adjacent to the visual
+  element it names.
+- Rendered math was checked in the review PNG. If hand-written
+  delimiters render literally, switch the cell to `tex_cell()` or
+  `\(...\)` notation.
 - Every sub-panel header, axis label, and legend label measures
   ≥ 1.5 % of `min(canvas_dim)` after final scaling
 - Sub-panel count is deliberate (3–6 per dense phase, 1–3 per simple

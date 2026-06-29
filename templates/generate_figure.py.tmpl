@@ -39,9 +39,10 @@ OUT = OUT_DIR / "__FIGURE_NAME__.drawio"
 COLORS: dict[str, str] = {
     "ink": "#1F2937",
     "muted": "#64748B",
-    "local": "#2563EB",
-    "global": "#7E22CE",
-    "state": "#D97706",
+    "primary": "#2563EB",
+    "secondary": "#7E22CE",
+    "accent": "#D97706",
+    "warning": "#EF4444",
     "neutral_stroke": "#CBD5E1",
     "neutral_fill": "#FBFCFD",
 }
@@ -120,7 +121,7 @@ def build(d: FigureBuilder) -> str:
         "semantic method draft",
         tag="[B]",
         fill="#FFFFFF",
-        stroke="#2563EB",
+        stroke=COLORS["primary"],
         level="row",
         prefix="row_b",
     )
@@ -138,13 +139,13 @@ def build(d: FigureBuilder) -> str:
         ["A", "B", "C"],
         [0.64, 0.46, 0.56],
         title="controlled evidence",
-        color=COLORS["local"],
+        color=COLORS["primary"],
         prefix="evidence",
     )
     d.block_arrow(
         arrow.inset(arrow.w * 0.22, 4, arrow.w * 0.22, 4),
-        start_color=COLORS["local"],
-        end_color=COLORS["global"],
+        start_color=COLORS["primary"],
+        end_color=COLORS["secondary"],
         label="iterative",
         prefix="iter_arrow",
     )
@@ -155,8 +156,8 @@ def build(d: FigureBuilder) -> str:
         lower.h,
         ["A", "B", "C"],
         [0.78, 0.25, 0.18],
-        title="posterior state",
-        color=COLORS["global"],
+        title="summary distribution",
+        color=COLORS["secondary"],
         prefix="posterior",
     )
 
@@ -167,7 +168,7 @@ def build(d: FigureBuilder) -> str:
         readout.h - 84,
         "converged readout",
         ["prediction", "soft target"],
-        color=COLORS["global"],
+        color=COLORS["secondary"],
         prefix="readout",
     )
     return panel_b
